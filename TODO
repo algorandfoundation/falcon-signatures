@@ -1,0 +1,5 @@
+1. implement `falcon algorand address` command
+2. implement `falcon algorand send` command
+3. review all code
+4. improve test coverage
+5. review file organization
