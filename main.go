@@ -32,6 +32,9 @@ func Main() {
 	case "info":
 		code := runInfo(os.Args[2:])
 		os.Exit(code)
+	case "algorand":
+		code := runAlgorand(os.Args[2:])
+		os.Exit(code)
 	case "help", "-h", "--help":
 		runHelp(os.Args[2:])
 	default:
