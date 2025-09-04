@@ -2,11 +2,13 @@
 
 Sign a message using a Falcon-1024 private key.
 
-- Flags:
-  - `--key <file>`: path to a keypair file
-  - `--in <file>` or `--msg <string>`: message to sign (one required)
-  - `--hex`: if set, treat message input as hex-encoded bytes; otherwise UTF-8 string
-  - `--out <file>`: write the signature to a file; otherwise printed to stdout
+#### Arguments
+  - Required
+    - `--key <file>`: path to a keypair file
+    - one of: `--in <file>` or `--msg <string>`: message to sign
+  - Optional
+    - `--hex`: treat message input as hex-encoded bytes; otherwise UTF-8 string
+    - `--out <file>`: write the signature to a file; otherwise printed to stdout
 
 ## Examples
 

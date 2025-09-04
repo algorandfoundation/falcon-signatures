@@ -2,9 +2,10 @@
 
 Generate a new Falcon-1024 keypair.
 
-- Flags:
-  - `--seed <hex>`: deterministically derive the keypair from a hex-encoded seed
-  - `--out <file>`: write the keypair to a JSON file; otherwise prints to stdout
+#### Arguments
+  - Optional:
+    - `--seed <hex>`: deterministically derive the keypair from a hex-encoded seed
+    - `--out <file>`: write the keypair to a JSON file; otherwise prints to stdout
 
 ## Examples
 

@@ -2,7 +2,9 @@
 
 Show help for the CLI or a specific command.
 
-- Optional argument: `command` — the subcommand to show help for
+#### Arguments
+  - Optional
+    - `command`: the subcommand to show help for
 
 ## Examples
 

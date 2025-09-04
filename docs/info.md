@@ -2,8 +2,9 @@
 
 Display information about a keypair file. Prints the public and/or private key if present.
 
-- Flags:
-  - `--key <file>`: path to a keypair file
+#### Arguments
+  - Required
+    - `--key <file>`: path to a keypair file
 
 ## Examples
 

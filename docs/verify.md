@@ -2,11 +2,13 @@
 
 Verify a Falcon-1024 signature against a message and public key.
 
-- Flags:
-  - `--key <file>`: path to a keypair file (may contain only a public key)
-  - `--in <file>` or `--msg <string>`: message that was signed
-  - `--hex`: if set, treat message as hex-encoded bytes; otherwise UTF-8 string
-  - `--sig <file>` or `--signature <hex>`: signature to verify
+#### Arguments
+  - Required
+    - `--key <file>`: path to a keypair file (may contain only a public key)
+    - one of: `--in <file>` or `--msg <string>`: message that was signed
+    - one of: `--sig <file>` or `--signature <hex>`: signature to verify
+  - Optional
+    - `--hex`: treat message as hex-encoded bytes; otherwise UTF-8 string
 
 ## Examples
 
