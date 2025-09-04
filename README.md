@@ -26,10 +26,10 @@ You need Go installed.
 To install directly:
 
 ```bash
-go install github.com/algorandfoundation/falcon-signatures@latest
+go install github.com/algorandfoundation/falcon-signatures/cmd/falcon@latest
 ```
 
-This will place the `falcon` binary in your Go bin directory (usually `$GOPATH/bin`).
+This places the `falcon` binary in your Go bin directory (usually `$GOBIN` or `$GOPATH/bin`).
 Make sure that directory is on your `PATH`.
 
 Verify installation:

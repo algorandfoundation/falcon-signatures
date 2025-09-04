@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"fmt"
@@ -10,7 +10,8 @@ type keyPairJSON struct {
 	PrivateKey string `json:"private_key,omitempty"`
 }
 
-func main() {
+// Main is the CLI entrypoint used by the falcon binary.
+func Main() {
 	if len(os.Args) < 2 {
 		// No subcommand -> show help
 		fmt.Fprint(os.Stdout, topHelp)

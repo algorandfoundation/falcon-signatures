@@ -1,5 +1,5 @@
 GO ?= go
-PKG := .
+PKG := ./cmd/falcon
 BIN := falcon
 
 .PHONY: build test vet format
