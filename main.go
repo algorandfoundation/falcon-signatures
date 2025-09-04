@@ -20,13 +20,17 @@ func main() {
 	cmd := os.Args[1]
 	switch cmd {
 	case "create":
-		runCreate(os.Args[2:])
+		code := runCreate(os.Args[2:])
+		os.Exit(code)
 	case "sign":
-		runSign(os.Args[2:])
+		code := runSign(os.Args[2:])
+		os.Exit(code)
 	case "verify":
-		runVerify(os.Args[2:])
+		code := runVerify(os.Args[2:])
+		os.Exit(code)
 	case "info":
-		runInfo(os.Args[2:])
+		code := runInfo(os.Args[2:])
+		os.Exit(code)
 	case "help", "-h", "--help":
 		runHelp(os.Args[2:])
 	default:

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 )
 
 // ---- create ----
-func runCreate(args []string) {
+func runCreate(args []string) int {
 	fs := flag.NewFlagSet("create", flag.ExitOnError)
 	seedText := fs.String("seed", "", "text seed/passphrase (KDF 100k iters, fixed salt)")
 	out := fs.String("out", "", "write keypair JSON to file (stdout if empty)")
@@ -27,7 +28,8 @@ func runCreate(args []string) {
 
 	kp, err := GenerateFalconKeyPair(seed)
 	if err != nil {
-		fatalf("failed to generate keypair: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to generate keypair: %v\n", err)
+		return 2
 	}
 
 	obj := keyPairJSON{
@@ -36,18 +38,21 @@ func runCreate(args []string) {
 	}
 	data, err := json.MarshalIndent(obj, "", "  ")
 	if err != nil {
-		fatalf("failed to encode keypair JSON: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to encode keypair JSON: %v\n", err)
+		return 2
 	}
 
 	if *out == "" {
 		os.Stdout.Write(data)
 		os.Stdout.Write([]byte("\n"))
-		return
+		return 0
 	}
 
 	if err := writeFileAtomic(*out, data, 0o600); err != nil {
-		fatalf("failed to write %s: %v", *out, err)
+		fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", *out, err)
+		return 2
 	}
+	return 0
 }
 
 // Seed derivation parameters from user seedphrase

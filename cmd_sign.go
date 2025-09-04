@@ -9,7 +9,7 @@ import (
 )
 
 // ---- sign ----
-func runSign(args []string) {
+func runSign(args []string) int {
 	fs := flag.NewFlagSet("sign", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to keypair JSON file")
 	inFile := fs.String("in", "", "file containing message (alternative to --msg)")
@@ -19,19 +19,23 @@ func runSign(args []string) {
 	_ = fs.Parse(args)
 
 	if *keyPath == "" {
-		fatalf("--key is required")
+		fmt.Fprintf(os.Stderr, "--key is required\n")
+		return 2
 	}
 	if (*inFile == "" && *msg == "") || (*inFile != "" && *msg != "") {
-		fatalf("provide exactly one of --in or --msg")
+		fmt.Fprintf(os.Stderr, "provide exactly one of --in or --msg\n")
+		return 2
 	}
 
 	// Load private key
 	_, priv, err := loadKeypairFile(*keyPath)
 	if err != nil {
-		fatalf("failed to read --key: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
+		return 2
 	}
 	if priv == nil {
-		fatalf("private key not found in %s (required for signing)", *keyPath)
+		fmt.Fprintf(os.Stderr, "private key not found in %s (required for signing)\n", *keyPath)
+		return 2
 	}
 	// Construct keypair struct expected by Sign
 	var kp FalconKeyPair
@@ -43,12 +47,14 @@ func runSign(args []string) {
 	if *inFile != "" {
 		b, err := os.ReadFile(*inFile)
 		if err != nil {
-			fatalf("failed to read --in: %v", err)
+			fmt.Fprintf(os.Stderr, "failed to read --in: %v\n", err)
+			return 2
 		}
 		if *hexIn {
 			msgBytes, err = parseHex(strings.TrimSpace(string(b)))
 			if err != nil {
-				fatalf("invalid hex in --in file: %v", err)
+				fmt.Fprintf(os.Stderr, "invalid hex in --in file: %v\n", err)
+				return 2
 			}
 		} else {
 			msgBytes = b
@@ -58,7 +64,8 @@ func runSign(args []string) {
 			var err error
 			msgBytes, err = parseHex(*msg)
 			if err != nil {
-				fatalf("invalid --msg hex: %v", err)
+				fmt.Fprintf(os.Stderr, "invalid --msg hex: %v\n", err)
+				return 2
 			}
 		} else {
 			msgBytes = []byte(*msg)
@@ -67,17 +74,20 @@ func runSign(args []string) {
 
 	sig, err := kp.Sign(msgBytes)
 	if err != nil {
-		fatalf("signing failed: %v", err)
+		fmt.Fprintf(os.Stderr, "signing failed: %v\n", err)
+		return 2
 	}
 
 	if *out == "" {
 		fmt.Println(strings.ToLower(hex.EncodeToString(sig)))
-		return
+		return 0
 	}
 
 	if err := writeFileAtomic(*out, sig, 0o644); err != nil {
-		fatalf("failed to write signature: %v", err)
+		fmt.Fprintf(os.Stderr, "failed to write signature: %v\n", err)
+		return 2
 	}
+	return 0
 }
 
 const helpSign = `# falcon sign
