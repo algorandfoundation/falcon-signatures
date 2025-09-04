@@ -73,7 +73,6 @@ falcon create   : Create a new keypair
 falcon sign     : Sign a message
 falcon verify   : Verify a signature for a message
 falcon info     : Display information about a keypair file
-falcon algorand : Algorand-specific operations
 falcon help     : Show help
 ```
 
@@ -83,7 +82,6 @@ Detailed command syntax lives in per-command docs:
 - [`falcon sign`](docs/sign.md)
 - [`falcon verify`](docs/verify.md)
 - [`falcon info`](docs/info.md)
-- [`falcon algorand`](docs/algorand.md)
 - [`falcon help`](docs/help.md)
 
 ---

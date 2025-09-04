@@ -569,4 +569,3 @@ func TestSizeConsistencyAcrossKeyPairs(t *testing.T) {
 		})
 	}
 }
-

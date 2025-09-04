@@ -4,4 +4,4 @@ go 1.25.0
 
 require github.com/algorand/falcon v0.1.0
 
-require golang.org/x/crypto v0.37.0 // indirect
+require golang.org/x/crypto v0.37.0
