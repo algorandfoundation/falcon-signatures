@@ -74,6 +74,8 @@ falcon sign     : Sign a message
 falcon verify   : Verify a signature for a message
 falcon info     : Display information about a keypair file
 falcon help     : Show help
+- -
+falcon algorand : Algorand-specific commands
 ```
 
 Detailed command syntax lives in per-command docs:
@@ -83,6 +85,7 @@ Detailed command syntax lives in per-command docs:
 - [`falcon verify`](docs/verify.md)
 - [`falcon info`](docs/info.md)
 - [`falcon help`](docs/help.md)
+- [`falcon algorand`](docs/algorand.md)
 
 ---
 
