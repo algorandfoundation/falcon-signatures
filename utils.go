@@ -98,8 +98,3 @@ func writeFileAtomic(path string, data []byte, mode os.FileMode) error {
 	}
 	return nil
 }
-
-func fatalf(format string, a ...any) {
-	fmt.Fprintf(os.Stderr, format+"\n", a...)
-	os.Exit(2)
-}

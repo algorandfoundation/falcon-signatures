@@ -64,15 +64,12 @@ func TestRunCreate_WithSeed_PrintsDeterministicJSON(t *testing.T) {
 	}
 
 	// Cross-check deterministically derived keys match library output
-	kseed := deriveSeed([]byte(seed))
-	kp, err := falcongo.GenerateKeyPair(kseed)
-	if err != nil {
-		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
-	}
-	if got, want := len(pkBytes), len(kp.PublicKey); got != want {
+	// Use zero-value types to obtain expected lengths without generating a keypair
+	var zeroKP falcongo.KeyPair
+	if got, want := len(pkBytes), len(zeroKP.PublicKey); got != want {
 		t.Fatalf("public key length mismatch: got %d want %d", got, want)
 	}
-	if got, want := len(skBytes), len(kp.PrivateKey); got != want {
+	if got, want := len(skBytes), len(zeroKP.PrivateKey); got != want {
 		t.Fatalf("private key length mismatch: got %d want %d", got, want)
 	}
 }
