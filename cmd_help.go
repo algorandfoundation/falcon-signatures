@@ -46,22 +46,22 @@ func runHelp(args []string) {
 
 // lookupDoc returns built-in help text for a command if present.
 func lookupDoc(topic string) (string, bool) {
-    switch topic {
-    case "create":
-        return helpCreate, true
-    case "sign":
-        return helpSign, true
-    case "verify":
-        return helpVerify, true
-    case "info":
-        return helpInfo, true
-    case "algorand":
-        return helpAlgorand, true
-    case "help":
-        return helpHelp, true
-    default:
-        return "", false
-    }
+	switch topic {
+	case "create":
+		return helpCreate, true
+	case "sign":
+		return helpSign, true
+	case "verify":
+		return helpVerify, true
+	case "info":
+		return helpInfo, true
+	case "algorand":
+		return helpAlgorand, true
+	case "help":
+		return helpHelp, true
+	default:
+		return "", false
+	}
 }
 
 const helpHelp = `# falcon help
