@@ -1,7 +1,8 @@
 name: Falcon Signature CI
 
 on:
-  push: [ main ]
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
     types: [ opened, reopened, synchronize, ready_for_review ]
