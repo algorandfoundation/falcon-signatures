@@ -99,7 +99,9 @@ func TestGenerateFalconKeyPair_DifferentSeeds(t *testing.T) {
 
 func TestSign_ValidMessage(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -132,7 +134,9 @@ func TestSign_ValidMessage(t *testing.T) {
 
 func TestSignBytes_DirectBytesSigning(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -153,7 +157,9 @@ func TestSignBytes_DirectBytesSigning(t *testing.T) {
 
 func TestVerify_ValidSignature(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -175,7 +181,9 @@ func TestVerify_ValidSignature(t *testing.T) {
 
 func TestVerify_InvalidSignature(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -200,8 +208,12 @@ func TestVerify_InvalidSignature(t *testing.T) {
 func TestVerify_WrongPublicKey(t *testing.T) {
 	seed1 := make([]byte, 48)
 	seed2 := make([]byte, 48)
-	rand.Read(seed1)
-	rand.Read(seed2)
+	if _, err := rand.Read(seed1); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
+	if _, err := rand.Read(seed2); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair1, err := GenerateKeyPair(seed1)
 	if err != nil {
@@ -228,7 +240,9 @@ func TestVerify_WrongPublicKey(t *testing.T) {
 
 func TestVerifyBytes_DirectBytesVerification(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -256,7 +270,9 @@ func TestVerifyBytes_DirectBytesVerification(t *testing.T) {
 
 func TestSignAndVerify_RoundTrip(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -287,7 +303,9 @@ func TestSignAndVerify_RoundTrip(t *testing.T) {
 
 func TestGetFixedLengthSignature(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -341,14 +359,8 @@ const (
 )
 
 func TestFalconKeySizes(t *testing.T) {
-	seed := make([]byte, 48)
-	rand.Read(seed)
-
-	keypair, err := GenerateKeyPair(seed)
-	if err != nil {
-		t.Fatalf("Failed to generate keypair: %v", err)
-	}
-
+	// Use zero-value keypair to check compile-time lengths
+	var keypair KeyPair
 	actualPublicKeySize := len(keypair.PublicKey)
 	if actualPublicKeySize != expectedPublicKeySize {
 		t.Errorf("Public key size mismatch: expected %d bytes, got %d bytes", expectedPublicKeySize, actualPublicKeySize)
@@ -365,7 +377,9 @@ func TestFalconKeySizes(t *testing.T) {
 
 func TestFalconSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
@@ -428,7 +442,9 @@ func TestFalconSignatureSize(t *testing.T) {
 
 func TestFalconUncompressedSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
-	rand.Read(seed)
+	if _, err := rand.Read(seed); err != nil {
+		t.Fatalf("rand.Read: %v", err)
+	}
 
 	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
