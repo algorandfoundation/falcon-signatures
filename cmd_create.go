@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 	"golang.org/x/crypto/pbkdf2"
 )
 
@@ -26,7 +27,7 @@ func runCreate(args []string) int {
 		seed = deriveSeed([]byte(*seedText))
 	}
 
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to generate keypair: %v\n", err)
 		return 2

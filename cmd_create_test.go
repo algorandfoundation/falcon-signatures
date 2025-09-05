@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // captureStdout captures os.Stdout output produced by fn and returns it as a string.
@@ -63,7 +65,7 @@ func TestRunCreate_WithSeed_PrintsDeterministicJSON(t *testing.T) {
 
 	// Cross-check deterministically derived keys match library output
 	kseed := deriveSeed([]byte(seed))
-	kp, err := GenerateFalconKeyPair(kseed)
+	kp, err := falcongo.GenerateKeyPair(kseed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}

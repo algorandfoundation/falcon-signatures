@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // captureStderr captures os.Stderr output produced by fn and returns it as a string.
@@ -30,7 +32,7 @@ func captureStderr(t *testing.T, fn func()) string {
 func TestRunInfo_PrintsBothKeys(t *testing.T) {
 	// Deterministic keypair
 	seed := deriveSeed([]byte("info both keys seed"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -50,7 +52,7 @@ func TestRunInfo_PrintsBothKeys(t *testing.T) {
 
 func TestRunInfo_PublicOnly(t *testing.T) {
 	seed := deriveSeed([]byte("info public only seed"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}

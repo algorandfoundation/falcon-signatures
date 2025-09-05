@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // ---- sign ----
@@ -38,7 +40,7 @@ func runSign(args []string) int {
 		return 2
 	}
 	// Construct keypair struct expected by Sign
-	var kp FalconKeyPair
+	var kp falcongo.KeyPair
 	copy(kp.PrivateKey[:], priv)
 	// Public key not needed for signing.
 
@@ -79,11 +81,11 @@ func runSign(args []string) int {
 	}
 
 	if *out == "" {
-		fmt.Println(strings.ToLower(hex.EncodeToString(sig)))
+		fmt.Println(strings.ToLower(hex.EncodeToString([]byte(sig))))
 		return 0
 	}
 
-	if err := writeFileAtomic(*out, sig, 0o644); err != nil {
+	if err := writeFileAtomic(*out, []byte(sig), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to write signature: %v\n", err)
 		return 2
 	}

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/algorand/falcon"
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // ---- verify ----
@@ -90,9 +93,9 @@ func runVerify(args []string) int {
 	}
 
 	// Verify
-	var pk FalconKeyPair
+	var pk falcongo.KeyPair
 	copy(pk.PublicKey[:], pub)
-	err = Verify(msgBytes, sigBytes, pk.PublicKey)
+	err = falcongo.Verify(msgBytes, falcon.CompressedSignature(sigBytes), pk.PublicKey)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, "INVALID")
 		return 1

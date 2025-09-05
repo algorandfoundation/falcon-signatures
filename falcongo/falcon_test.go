@@ -1,4 +1,4 @@
-package cli
+package falcongo
 
 import (
 	"bytes"
@@ -8,12 +8,12 @@ import (
 )
 
 func TestGenerateFalconKeyPair_WithoutSeed(t *testing.T) {
-	keypair1, err := GenerateFalconKeyPair(nil)
+	keypair1, err := GenerateKeyPair(nil)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
 
-	keypair2, err := GenerateFalconKeyPair(nil)
+	keypair2, err := GenerateKeyPair(nil)
 	if err != nil {
 		t.Fatalf("Failed to generate second keypair: %v", err)
 	}
@@ -29,12 +29,12 @@ func TestGenerateFalconKeyPair_WithoutSeed(t *testing.T) {
 
 func TestGenerateFalconKeyPair_WithEmptySeed(t *testing.T) {
 	emptySeed := []byte{}
-	keypair1, err := GenerateFalconKeyPair(emptySeed)
+	keypair1, err := GenerateKeyPair(emptySeed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair with empty seed: %v", err)
 	}
 
-	keypair2, err := GenerateFalconKeyPair(emptySeed)
+	keypair2, err := GenerateKeyPair(emptySeed)
 	if err != nil {
 		t.Fatalf("Failed to generate second keypair with empty seed: %v", err)
 	}
@@ -50,12 +50,12 @@ func TestGenerateFalconKeyPair_WithSeed(t *testing.T) {
 		seed[i] = byte(i)
 	}
 
-	keypair1, err := GenerateFalconKeyPair(seed)
+	keypair1, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair with seed: %v", err)
 	}
 
-	keypair2, err := GenerateFalconKeyPair(seed)
+	keypair2, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate second keypair with same seed: %v", err)
 	}
@@ -78,12 +78,12 @@ func TestGenerateFalconKeyPair_DifferentSeeds(t *testing.T) {
 		seed2[i] = byte(i + 1)
 	}
 
-	keypair1, err := GenerateFalconKeyPair(seed1)
+	keypair1, err := GenerateKeyPair(seed1)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair with first seed: %v", err)
 	}
 
-	keypair2, err := GenerateFalconKeyPair(seed2)
+	keypair2, err := GenerateKeyPair(seed2)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair with second seed: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestSign_ValidMessage(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -134,7 +134,7 @@ func TestSignBytes_DirectBytesSigning(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestVerify_ValidSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -165,11 +165,6 @@ func TestVerify_ValidSignature(t *testing.T) {
 	signature, err := keypair.Sign(message)
 	if err != nil {
 		t.Fatalf("Failed to sign message: %v", err)
-	}
-
-	err = keypair.Verify(message, signature)
-	if err != nil {
-		t.Errorf("Valid signature should verify successfully: %v", err)
 	}
 
 	err = Verify(message, signature, keypair.PublicKey)
@@ -182,7 +177,7 @@ func TestVerify_InvalidSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -196,11 +191,6 @@ func TestVerify_InvalidSignature(t *testing.T) {
 
 	tamperedMessage := []byte("Tampered message for verification")
 
-	err = keypair.Verify(tamperedMessage, signature)
-	if err == nil {
-		t.Error("Tampered message should not verify")
-	}
-
 	err = Verify(tamperedMessage, signature, keypair.PublicKey)
 	if err == nil {
 		t.Error("Tampered message should not verify with standalone function")
@@ -213,12 +203,12 @@ func TestVerify_WrongPublicKey(t *testing.T) {
 	rand.Read(seed1)
 	rand.Read(seed2)
 
-	keypair1, err := GenerateFalconKeyPair(seed1)
+	keypair1, err := GenerateKeyPair(seed1)
 	if err != nil {
 		t.Fatalf("Failed to generate first keypair: %v", err)
 	}
 
-	keypair2, err := GenerateFalconKeyPair(seed2)
+	keypair2, err := GenerateKeyPair(seed2)
 	if err != nil {
 		t.Fatalf("Failed to generate second keypair: %v", err)
 	}
@@ -240,7 +230,7 @@ func TestVerifyBytes_DirectBytesVerification(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -268,7 +258,7 @@ func TestSignAndVerify_RoundTrip(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -287,14 +277,9 @@ func TestSignAndVerify_RoundTrip(t *testing.T) {
 				t.Fatalf("Failed to sign message: %v", err)
 			}
 
-			err = keypair.Verify(message, signature)
-			if err != nil {
-				t.Errorf("Failed to verify signature: %v", err)
-			}
-
 			err = Verify(message, signature, keypair.PublicKey)
 			if err != nil {
-				t.Errorf("Failed to verify with standalone function: %v", err)
+				t.Errorf("Failed to verify signature: %v", err)
 			}
 		})
 	}
@@ -304,7 +289,7 @@ func TestGetFixedLengthSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -348,28 +333,6 @@ func TestHash_Consistency(t *testing.T) {
 	}
 }
 
-func TestKeyPairIntegrity(t *testing.T) {
-	seed := make([]byte, 48)
-	rand.Read(seed)
-
-	keypair, err := GenerateFalconKeyPair(seed)
-	if err != nil {
-		t.Fatalf("Failed to generate keypair: %v", err)
-	}
-
-	if len(keypair.PublicKey) == 0 {
-		t.Error("Public key should not be empty")
-	}
-
-	if len(keypair.PrivateKey) == 0 {
-		t.Error("Private key should not be empty")
-	}
-
-	if bytes.Equal(keypair.PublicKey[:], keypair.PrivateKey[:]) {
-		t.Error("Public key and private key should be different")
-	}
-}
-
 const (
 	expectedPublicKeySize              = 1793
 	expectedPrivateKeySize             = 2305
@@ -381,7 +344,7 @@ func TestFalconKeySizes(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -404,7 +367,7 @@ func TestFalconSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -467,7 +430,7 @@ func TestFalconUncompressedSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
 	rand.Read(seed)
 
-	keypair, err := GenerateFalconKeyPair(seed)
+	keypair, err := GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("Failed to generate keypair: %v", err)
 	}
@@ -531,7 +494,7 @@ func TestSizeConsistencyAcrossKeyPairs(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			keypair, err := GenerateFalconKeyPair(tc.seed)
+			keypair, err := GenerateKeyPair(tc.seed)
 			if err != nil {
 				t.Fatalf("Failed to generate keypair: %v", err)
 			}

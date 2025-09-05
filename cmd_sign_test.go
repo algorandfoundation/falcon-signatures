@@ -7,10 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	falconlib "github.com/algorand/falcon"
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // helper to write a keypair JSON file for tests
-func writeKeypairJSON(t *testing.T, dir string, fname string, kp FalconKeyPair, includePriv bool) string {
+func writeKeypairJSON(t *testing.T, dir string, fname string, kp falcongo.KeyPair, includePriv bool) string {
 	t.Helper()
 	obj := keyPairJSON{
 		PublicKey:  strings.ToLower(hex.EncodeToString(kp.PublicKey[:])),
@@ -33,7 +36,7 @@ func writeKeypairJSON(t *testing.T, dir string, fname string, kp FalconKeyPair, 
 func TestRunSign_MsgStdout_DeterministicAndVerifiable(t *testing.T) {
 	// Deterministic key from seed
 	seed := deriveSeed([]byte("unit test seed for sign"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -67,7 +70,7 @@ func TestRunSign_MsgStdout_DeterministicAndVerifiable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("stdout not valid hex: %v", err)
 	}
-	if err := Verify([]byte(msg), sigBytes, kp.PublicKey); err != nil {
+	if err := falcongo.Verify([]byte(msg), falconlib.CompressedSignature(sigBytes), kp.PublicKey); err != nil {
 		t.Fatalf("signature did not verify: %v", err)
 	}
 }
@@ -75,7 +78,7 @@ func TestRunSign_MsgStdout_DeterministicAndVerifiable(t *testing.T) {
 func TestRunSign_InHexToOutFile_Verifiable(t *testing.T) {
 	// Deterministic key
 	seed := deriveSeed([]byte("unit test seed for sign hex file"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -103,7 +106,7 @@ func TestRunSign_InHexToOutFile_Verifiable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("parse message hex: %v", err)
 	}
-	if err := Verify(msgBytes, sigBytes, kp.PublicKey); err != nil {
+	if err := falcongo.Verify(msgBytes, falconlib.CompressedSignature(sigBytes), kp.PublicKey); err != nil {
 		t.Fatalf("signature from file did not verify: %v", err)
 	}
 }
@@ -148,7 +151,7 @@ func TestRunSign_NoneMsgNorIn_Returns2(t *testing.T) {
 func TestRunSign_RequiresPrivateKey_Returns2(t *testing.T) {
 	// Key file with only public key
 	seed := deriveSeed([]byte("sign missing sk"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -167,7 +170,7 @@ func TestRunSign_RequiresPrivateKey_Returns2(t *testing.T) {
 
 func TestRunSign_InvalidMsgHex_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign invalid msg hex"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -186,7 +189,7 @@ func TestRunSign_InvalidMsgHex_Returns2(t *testing.T) {
 
 func TestRunSign_FailedInFileRead_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign missing file"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -258,7 +261,7 @@ func TestRunSign_InvalidPrivateHex_Returns2(t *testing.T) {
 
 func TestRunSign_InvalidHexInFile_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign invalid file hex"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -280,7 +283,7 @@ func TestRunSign_InvalidHexInFile_Returns2(t *testing.T) {
 
 func TestRunSign_OutWriteFails_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign out write fails"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}

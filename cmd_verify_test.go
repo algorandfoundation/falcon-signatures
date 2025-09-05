@@ -7,12 +7,14 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 func TestRunVerify_WithSignatureHex_STDOUT_VALID(t *testing.T) {
 	// Deterministic key and signature
 	seed := deriveSeed([]byte("unit test seed for verify"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -40,7 +42,7 @@ func TestRunVerify_WithSignatureHex_STDOUT_VALID(t *testing.T) {
 
 func TestRunVerify_InFileAndSigFile_VALID(t *testing.T) {
 	seed := deriveSeed([]byte("unit test seed for verify files"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -74,7 +76,7 @@ func TestRunVerify_InFileAndSigFile_VALID(t *testing.T) {
 
 func TestRunVerify_InvalidSignature_Exits1AndPrintsINVALID(t *testing.T) {
 	seed := deriveSeed([]byte("unit test seed for verify invalid"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -138,7 +140,7 @@ func TestRunVerify_BothSigFlags_Returns2(t *testing.T) {
 func TestRunVerify_InvalidMsgHex_Returns2(t *testing.T) {
 	// Provide valid key file so we pass key validation
 	seed := deriveSeed([]byte("verify invalid msg hex"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -157,7 +159,7 @@ func TestRunVerify_InvalidMsgHex_Returns2(t *testing.T) {
 
 func TestRunVerify_InvalidSignatureHex_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("verify invalid sig hex"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -177,7 +179,7 @@ func TestRunVerify_InvalidSignatureHex_Returns2(t *testing.T) {
 func TestRunVerify_PublicKeyMissingInFile_Returns2(t *testing.T) {
 	// key file with only private key
 	seed := deriveSeed([]byte("verify missing pub"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -202,7 +204,7 @@ func TestRunVerify_PublicKeyMissingInFile_Returns2(t *testing.T) {
 
 func TestRunVerify_FailedSigFileRead_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("verify missing sig file"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -261,7 +263,7 @@ func TestRunVerify_InvalidPublicHexInKey_Returns2(t *testing.T) {
 
 func TestRunVerify_NoneMsgNorIn_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("verify none msg"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -279,7 +281,7 @@ func TestRunVerify_NoneMsgNorIn_Returns2(t *testing.T) {
 
 func TestRunVerify_InvalidHexInMsgFile_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("verify invalid msg file"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
@@ -301,7 +303,7 @@ func TestRunVerify_InvalidHexInMsgFile_Returns2(t *testing.T) {
 
 func TestRunVerify_FailedInFileRead_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("verify missing in file"))
-	kp, err := GenerateFalconKeyPair(seed)
+	kp, err := falcongo.GenerateKeyPair(seed)
 	if err != nil {
 		t.Fatalf("GenerateFalconKeyPair failed: %v", err)
 	}
