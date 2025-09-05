@@ -28,7 +28,6 @@ jobs:
         uses: golangci/golangci-lint-action@v7
         with:
           version: v2.4.0  # match pre-commit version
-          args: --timeout=5m
 
       - name: Run tests
         run: go test ./... -v
