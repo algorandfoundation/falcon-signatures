@@ -36,7 +36,8 @@ func Main() {
 		code := runAlgorand(os.Args[2:])
 		os.Exit(code)
 	case "help", "-h", "--help":
-		runHelp(os.Args[2:])
+		code := runHelp(os.Args[2:])
+		os.Exit(code)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n", cmd)
 		fmt.Fprint(os.Stderr, topHelp)
