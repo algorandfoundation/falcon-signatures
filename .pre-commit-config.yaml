@@ -3,3 +3,6 @@ repos:
     rev: v2.4.0
     hooks:
       - id: golangci-lint
+        name: golangci-lint (all files)
+        entry: golangci-lint run --config=.golangci.yaml
+        types: [ go ]
