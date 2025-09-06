@@ -50,9 +50,10 @@ Send algorand assets from an Algorand address controlled by a Falcon keypair.
     - `--to <address>`: Algorand address to send assets to
     - `--amount <number>`: amount of microAlgos to send (or asset units if `--asset-id` is set)
   - Optional
-    - `--fee <number>`: transaction fee in microAlgos (default is 1000)
+    - `--fee <number>`: transaction fee in microAlgos (default: minimum network transaction fee)
     - `--asset-id <number>`: asset ID to send (default is Algos)
     - `--note <string>`: optional note to include in the transaction
+    - `--network <name>`: network to use: `mainnet` (default), `testnet`, `betanet`, `devnet`
 
 #### Examples
 Send 1 Algo (1,000,000 microAlgos) to an address using a Falcon keypair:
@@ -65,3 +66,17 @@ Send 100 units of an asset with ID 123456 to an address with a custom fee and no
 falcon algorand send --key keypair.json --to ALGOADDRESS12345 --amount 100 --asset-id 123456 --fee 2000 --note "Payment for services"
 ```
 
+Send on TestNet using suggested params (default fee behavior):
+```bash
+falcon algorand send --key keypair.json --to TESTNETADDR... --amount 1000000 --network testnet
+```
+
+Send with an explicit flat fee of 0 microAlgos (for testing):
+```bash
+falcon algorand send --key keypair.json --to TESTNETADDR... --amount 500000 --fee 0 --network testnet
+```
+
+**Note**:<br>
+if environment variable `ALGOD_URL` is set, then the program will use that Algorand node (reading `ALGOD_TOKEN` as well if set).<br>
+If not set, Nodely endpoints will be used.<br>
+For `--network devnet`, `ALGOD_URL` (and optionally `ALGOD_TOKEN`) must be set to point to your node.
