@@ -2,6 +2,7 @@ package algorand
 
 import (
 	"context"
+	_ "embed"
 
 	"github.com/algorand/go-algorand-sdk/v2/crypto"
 	"github.com/algorand/go-algorand-sdk/v2/transaction"
@@ -13,7 +14,6 @@ import (
 type SendOptions struct {
 	Network Network // default MainNet
 	Fee     uint64  // in microAlgos
-	AssetID uint64  // default algo
 	Note    []byte  // default empty
 	// UseFlatFee controls whether to override suggested fee with Fee as a flat fee.
 	// If false, suggested params' fee behavior is used.
@@ -51,31 +51,16 @@ func Send(keyPair falcongo.KeyPair, to string, amount uint64, opt SendOptions,
 	}
 
 	var sendTxn types.Transaction
-	if opt.AssetID == 0 {
-		sendTxn, err = transaction.MakePaymentTxn(
-			lsigAddress, // from
-			to,          // to
-			amount,      // amount
-			opt.Note,    // note
-			"",          // closeRemainderTo
-			sp,          // suggested params
-		)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		sendTxn, err = transaction.MakeAssetTransferTxn(
-			lsigAddress, // from
-			to,          // to
-			amount,      // amount
-			opt.Note,    // note
-			sp,          // suggested params
-			"",          // closeAssetsTo
-			opt.AssetID, // asset index
-		)
-		if err != nil {
-			return "", err
-		}
+	sendTxn, err = transaction.MakePaymentTxn(
+		lsigAddress, // from
+		to,          // to
+		amount,      // amount
+		opt.Note,    // note
+		"",          // closeRemainderTo
+		sp,          // suggested params
+	)
+	if err != nil {
+		return "", err
 	}
 
 	// add dummy transactions to cover the size of the SignLogicSigTransaction
@@ -119,14 +104,8 @@ func Send(keyPair falcongo.KeyPair, to string, amount uint64, opt SendOptions,
 	return txID, nil
 }
 
-// dummyLsigTeal is a minimal LogicSig account that forbids rekeying
-const dummyLsigTeal = "#pragma version 3" +
-	"\n" + "txn RekeyTo" +
-	"\n" + "global ZeroAddress" +
-	"\n" + "=="
-
-// dummyLsigCompiled is the compiled dummyLsigTeal
-var dummyLsigCompiled = []byte{0x03, 0x31, 0x20, 0x32, 0x03, 0x12}
+//go:embed teal/dummyLsig.teal.tok
+var dummyLsigCompiled []byte
 
 // signDummyTxn signs the given transaction with the dummy LogicSig
 func signDummyTxn(txn types.Transaction) ([]byte, error) {

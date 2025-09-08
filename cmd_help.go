@@ -83,11 +83,11 @@ Algorand utilities powered by Falcon signatures.
 
 Usage:
   falcon algorand address --key <file> [--out <file>]
-  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--asset-id <number>] [--note <string>] [--network <name>]
+  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>]
 
 Subcommands:
   address   Derive an Algorand address from a Falcon public key
-  send      Send Algos or ASA units from a Falcon-controlled address
+  send      Send Algos from a Falcon-controlled address
 
 Arguments (address):
   --key <file>   keypair/public key JSON (required)
@@ -96,9 +96,8 @@ Arguments (address):
 Arguments (send):
   --key <file>       Falcon keypair JSON (required, must include private key)
   --to <address>     destination Algorand address (required)
-  --amount <number>  amount to send (microAlgos or asset units) (required)
+  --amount <number>  amount to send in microAlgos (required)
   --fee <number>     fee in microAlgos (default: minimum network transaction fee)
-  --asset-id <num>   ASA ID (omit or 0 for Algos)
   --note <string>    optional transaction note
   --network <name>   network: mainnet (default), testnet, betanet, devnet
 `

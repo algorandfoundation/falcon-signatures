@@ -12,7 +12,7 @@ The workflow for the user is as follows:
 
 The subcommands are:
 - `falcon algorand address`: Derive an Algorand address from a Falcon public key.
-- `falcon algorand send`: Send algorand assets from a Falcon-controlled address.
+- `falcon algorand send`: Send Algos from a Falcon-controlled address.
 
 ----
 
@@ -42,16 +42,15 @@ falcon algorand address --key keypair.json --out address.txt
 
 ### falcon algorand send
 
-Send algorand assets from an Algorand address controlled by a Falcon keypair.
+Send Algos from an Algorand address controlled by a Falcon keypair.
 
 #### Arguments
   - Required
     - `--key <file>`: path to a Falcon keypair file (must contain private key)
-    - `--to <address>`: Algorand address to send assets to
-    - `--amount <number>`: amount of microAlgos to send (or asset units if `--asset-id` is set)
+    - `--to <address>`: Algorand address to send to
+    - `--amount <number>`: amount of microAlgos to send
   - Optional
     - `--fee <number>`: transaction fee in microAlgos (default: minimum network transaction fee)
-    - `--asset-id <number>`: asset ID to send (default is Algos)
     - `--note <string>`: optional note to include in the transaction
     - `--network <name>`: network to use: `mainnet` (default), `testnet`, `betanet`, `devnet`
 
@@ -61,9 +60,9 @@ Send 1 Algo (1,000,000 microAlgos) to an address using a Falcon keypair:
 falcon algorand send --key keypair.json --to ALGOADDRESS12345 --amount 1000000
 ```
 
-Send 100 units of an asset with ID 123456 to an address with a custom fee and note:
+Send 1 Algo with a custom fee and note:
 ```bash
-falcon algorand send --key keypair.json --to ALGOADDRESS12345 --amount 100 --asset-id 123456 --fee 2000 --note "Payment for services"
+falcon algorand send --key keypair.json --to ALGOADDRESS12345 --amount 1000000 --fee 2000 --note "Payment for services"
 ```
 
 Send on TestNet using suggested params (default fee behavior):

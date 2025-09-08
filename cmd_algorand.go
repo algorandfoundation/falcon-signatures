@@ -85,9 +85,8 @@ func runAlgorandSend(args []string) int {
 	fs := flag.NewFlagSet("algorand send", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to Falcon keypair JSON file")
 	to := fs.String("to", "", "Algorand destination address")
-	amount := fs.Uint64("amount", 0, "amount to send (microAlgos or asset units)")
+	amount := fs.Uint64("amount", 0, "amount to send in microAlgos")
 	fee := fs.Uint64("fee", 0, "transaction fee in microAlgos (default: min network fee)")
-	assetID := fs.Uint64("asset-id", 0, "asset ID to send (0 = Algos)")
 	note := fs.String("note", "", "optional transaction note")
 	networkFlag := fs.String("network", "mainnet", "network: mainnet, testnet, betanet, devnet")
 	_ = fs.Parse(args)
@@ -142,7 +141,6 @@ func runAlgorandSend(args []string) int {
 	opt := algorand.SendOptions{
 		Network:    netw,
 		Fee:        *fee,
-		AssetID:    *assetID,
 		Note:       []byte(*note),
 		UseFlatFee: feeSet,
 	}
