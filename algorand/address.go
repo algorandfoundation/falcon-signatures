@@ -2,11 +2,12 @@ package algorand
 
 import (
 	"context"
+	_ "embed"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"os"
-	"strconv"
+	"strings"
 
 	"filippo.io/edwards25519"
 
@@ -32,6 +33,9 @@ const (
 	NodelyBetaNetAlgodURL = "https://betanet-api.4160.nodely.dev"
 )
 
+//go:embed teal/PQlogicsig.teal
+var PQlogicsigSource string
+
 // DeriveLogicSig outputs TEAL code for a LogicSig that verifies a Falcon signature.
 // The LogicSig embeds the Falcon public key and verifies the matching private key
 // was used to sign the transaction ID.
@@ -43,16 +47,11 @@ const (
 // derive a private key for the LogicSig escrow account.
 // On average it will take two attempts to find such a counter value.
 func DerivePQLogicSig(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, error) {
-	pubKeyHex := hex.EncodeToString(publicKey[:])
-	for counter := uint64(0); ; counter++ {
-		teal := "#pragma version 12" +
-			"\n" + "txn TxID" +
-			"\n" + "arg 0" +
-			"\n" + "byte 0x" + pubKeyHex +
-			"\n" + "falcon_verify" +
-			"\n" + "int " + strconv.FormatUint(counter, 10) +
-			"\n" + "pop"
-
+	pubKeyHex := "0x" + hex.EncodeToString(publicKey[:])
+	maxIterations := 1000 // should find a counter in way less than 1000 iterations
+	teal := strings.Replace(PQlogicsigSource, "TMPL_FALCON_PUBLIC_KEY", pubKeyHex, 1)
+	teal = strings.Replace(teal, "TMPL_COUNTER", "0x00", 1)
+	for counter := range maxIterations {
 		lsig, err := CompileLogicSig(teal)
 		if err != nil {
 			return crypto.LogicSigAccount{}, err
@@ -64,7 +63,12 @@ func DerivePQLogicSig(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, err
 		if !isOnTheCurve(lsa[:]) {
 			return lsig, nil // found a counter that works
 		}
+		oldCounterLine := fmt.Sprintf("0x%02x // counter", counter)
+		newCounterLine := fmt.Sprintf("0x%02x // counter", counter+1)
+		teal = strings.ReplaceAll(teal, oldCounterLine, newCounterLine)
 	}
+	return crypto.LogicSigAccount{},
+		fmt.Errorf("could not find a suitable counter in %d iterations", maxIterations)
 }
 
 // CompileLogicSig returns a LogicSigAccount compiled from the given TEAL code

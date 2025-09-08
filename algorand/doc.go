@@ -13,13 +13,12 @@
 // which takes as input a Falcon public key and outputs the following TEAL code:
 
 // 		#pragma version 12
+//		bytecblock TMPL_COUNTER
 // 		txn TxID
 // 		arg 0
-// 		byte 0x<$FALCON_PUBLIC_KEY>
+//		pushbytes TMPL_FALCON_PUBLIC_KEY
 // 		falcon_verify
-// 		int <$COUNTER>
-// 		pop
 
-// where <$FALCON_PUBLIC_KEY> is the hex encoding of the supplied Falcon public key, and <$COUNTER> is an integer
+// where TMPL_FALCON_PUBLIC_KEY is the supplied Falcon public key, and TMPL_COUNTER is the byte representation of a counter
 // that starts at 0 and is incremented by one until the resulting logicsig address is not a valid ed25519 public key.
 package algorand
