@@ -1,0 +1,4 @@
+#pragma version 3
+txn RekeyTo
+global ZeroAddress
+==

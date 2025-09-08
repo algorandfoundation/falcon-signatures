@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/algorandfoundation/falcon-signatures/algorand"
 	"github.com/algorandfoundation/falcon-signatures/falcongo"
@@ -84,11 +85,18 @@ func runAlgorandSend(args []string) int {
 	fs := flag.NewFlagSet("algorand send", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to Falcon keypair JSON file")
 	to := fs.String("to", "", "Algorand destination address")
-	amount := fs.Uint64("amount", 0, "amount to send (microAlgos or asset units)")
-	fee := fs.Uint64("fee", 1000, "transaction fee in microAlgos")
-	assetID := fs.Uint64("asset-id", 0, "asset ID to send (0 = Algos)")
+	amount := fs.Uint64("amount", 0, "amount to send in microAlgos")
+	fee := fs.Uint64("fee", 0, "transaction fee in microAlgos (default: min network fee)")
 	note := fs.String("note", "", "optional transaction note")
+	networkFlag := fs.String("network", "mainnet", "network: mainnet, testnet, betanet, devnet")
 	_ = fs.Parse(args)
+	// Track whether the user explicitly set --fee (even if zero)
+	feeSet := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "fee" {
+			feeSet = true
+		}
+	})
 
 	// Validate required flags
 	if *keyPath == "" {
@@ -104,10 +112,61 @@ func runAlgorandSend(args []string) int {
 		return 2
 	}
 
-	// Stub implementation (acknowledge parsed flags to avoid unused warnings)
-	_ = fee
-	_ = assetID
-	_ = note
-	fmt.Fprintln(os.Stdout, "algorand send: command not yet implemented")
+	// Parse network
+	netw, err := parseAlgorandNetwork(*networkFlag)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "invalid --network: %v\n", err)
+		return 2
+	}
+
+	// Load keypair (must include both public and private keys)
+	pub, priv, err := loadKeypairFile(*keyPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
+		return 2
+	}
+	if pub == nil {
+		fmt.Fprintf(os.Stderr, "public key not found in %s (required for sending)\n", *keyPath)
+		return 2
+	}
+	if priv == nil {
+		fmt.Fprintf(os.Stderr, "private key not found in %s (required for sending)\n", *keyPath)
+		return 2
+	}
+
+	var kp falcongo.KeyPair
+	copy(kp.PublicKey[:], pub)
+	copy(kp.PrivateKey[:], priv)
+
+	opt := algorand.SendOptions{
+		Network:    netw,
+		Fee:        *fee,
+		Note:       []byte(*note),
+		UseFlatFee: feeSet,
+	}
+
+	txID, err := algorand.Send(kp, *to, *amount, opt)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "send failed: %v\n", err)
+		return 2
+	}
+
+	fmt.Fprintf(os.Stdout, "Transaction confirmed with id: %s\n", txID)
 	return 0
+}
+
+// parseAlgorandNetwork converts a string flag into an algorand.Network value.
+func parseAlgorandNetwork(s string) (algorand.Network, error) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "", "mainnet":
+		return algorand.MainNet, nil
+	case "testnet":
+		return algorand.TestNet, nil
+	case "betanet":
+		return algorand.BetaNet, nil
+	case "devnet":
+		return algorand.DevNet, nil
+	default:
+		return 0, fmt.Errorf("unknown network %q (valid: mainnet, testnet, betanet, devnet)", s)
+	}
 }
