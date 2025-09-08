@@ -1,0 +1,9 @@
+// DO NOT CHANGE THIS FILE WITHOUT CHECKING HOW DerivePQLogicSig
+// HANDLES UPDATTING THE TEMPLATE VALUES
+
+#pragma version 12
+bytecblock TMPL_COUNTER // counter
+txn TxID
+arg 0
+pushbytes TMPL_FALCON_PUBLIC_KEY
+falcon_verify

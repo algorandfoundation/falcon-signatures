@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/algorandfoundation/falcon-signatures/algorand"
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 // ---- algorand dispatcher ----
@@ -43,9 +46,35 @@ func runAlgorandAddress(args []string) int {
 		return 2
 	}
 
-	// Stub implementation
-	_ = out // parsed but unused in stub
-	fmt.Fprintln(os.Stdout, "algorand address: command not yet implemented")
+	pub, _, err := loadKeypairFile(*keyPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
+		return 2
+	}
+	if pub == nil {
+		fmt.Fprintf(os.Stderr, "public key not found in %s\n", *keyPath)
+		return 2
+	}
+
+	var pk falcongo.PublicKey
+	copy(pk[:], pub)
+
+	address, err := algorand.GetAddressFromPublicKey(pk)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error deriving address: %v\n", err)
+		return 2
+	}
+
+	if *out == "" {
+		os.Stdout.Write(address)
+		os.Stdout.Write([]byte("\n"))
+		return 0
+	}
+
+	if err := writeFileAtomic(*out, address, 0o600); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", *out, err)
+		return 2
+	}
 	return 0
 }
 

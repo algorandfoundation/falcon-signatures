@@ -25,6 +25,7 @@
   - `make vet`: run `go vet ./...`.
   - `make format`: run `goimports` (if present), `go fmt`, and `gofmt -s -w .`.
 - Direct test invocation: `go test ./...` (add `-race -cover` locally for more checks).
+ - After making changes: run `make format` before committing to ensure consistent formatting and imports.
 
 ## CLI Conventions
 - Subcommands: `create`, `sign`, `verify`, `info`, `help` (see `docs/*.md` for details).
