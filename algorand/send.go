@@ -70,7 +70,7 @@ func Send(keyPair falcongo.KeyPair, to string, amount uint64, opt SendOptions,
 	}
 
 	txnToSign := sendGroup[0]
-	signature, err := keyPair.SignBytes(crypto.TransactionID(txnToSign))
+	signature, err := keyPair.Sign(crypto.TransactionID(txnToSign))
 	if err != nil {
 		return "", err
 	}

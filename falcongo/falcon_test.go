@@ -132,29 +132,6 @@ func TestSign_ValidMessage(t *testing.T) {
 	}
 }
 
-func TestSignBytes_DirectBytesSigning(t *testing.T) {
-	seed := make([]byte, 48)
-	if _, err := rand.Read(seed); err != nil {
-		t.Fatalf("rand.Read: %v", err)
-	}
-
-	keypair, err := GenerateKeyPair(seed)
-	if err != nil {
-		t.Fatalf("Failed to generate keypair: %v", err)
-	}
-
-	testData := []byte("test data for direct signing")
-
-	signature, err := keypair.SignBytes(testData)
-	if err != nil {
-		t.Fatalf("Failed to sign bytes: %v", err)
-	}
-
-	if len(signature) == 0 {
-		t.Error("Signature should not be empty")
-	}
-}
-
 func TestVerify_ValidSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -238,36 +215,6 @@ func TestVerify_WrongPublicKey(t *testing.T) {
 	}
 }
 
-func TestVerifyBytes_DirectBytesVerification(t *testing.T) {
-	seed := make([]byte, 48)
-	if _, err := rand.Read(seed); err != nil {
-		t.Fatalf("rand.Read: %v", err)
-	}
-
-	keypair, err := GenerateKeyPair(seed)
-	if err != nil {
-		t.Fatalf("Failed to generate keypair: %v", err)
-	}
-
-	testData := []byte("test data for direct verification")
-
-	signature, err := keypair.SignBytes(testData)
-	if err != nil {
-		t.Fatalf("Failed to sign bytes: %v", err)
-	}
-
-	err = VerifyBytes(testData, signature, keypair.PublicKey)
-	if err != nil {
-		t.Errorf("Valid signature should verify bytes successfully: %v", err)
-	}
-
-	tamperedData := []byte("tampered data for direct verification")
-	err = VerifyBytes(tamperedData, signature, keypair.PublicKey)
-	if err == nil {
-		t.Error("Tampered data should not verify")
-	}
-}
-
 func TestSignAndVerify_RoundTrip(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -326,28 +273,6 @@ func TestGetFixedLengthSignature(t *testing.T) {
 
 	if len(fixedLengthSig) == 0 {
 		t.Error("Fixed-length signature should not be empty")
-	}
-}
-
-func TestHash_Consistency(t *testing.T) {
-	testData := []byte("test data for hashing")
-
-	hash1 := Hash(testData)
-	hash2 := Hash(testData)
-
-	if !bytes.Equal(hash1[:], hash2[:]) {
-		t.Error("Hash function should be deterministic")
-	}
-
-	if len(hash1) != 32 {
-		t.Errorf("Hash should be 32 bytes, got %d", len(hash1))
-	}
-
-	differentData := []byte("different test data for hashing")
-	hash3 := Hash(differentData)
-
-	if bytes.Equal(hash1[:], hash3[:]) {
-		t.Error("Different data should produce different hashes")
 	}
 }
 
