@@ -7,8 +7,13 @@ BIN := falcon
 build: ## Build the CLI binary to ./falcon
 	$(GO) build -o $(BIN) $(PKG)
 
-test: ## Run tests with race detector and coverage
+# Unit tests only (test files without //go:build integration header)
+test: ## Run unit tests
 	$(GO) test -race -cover ./...
+
+# Unit and integration tests (also files with //go:build integration header)
+test-with-integration: ## Run unit + integration tests
+	$(GO) test -race -cover -tags=integration ./...
 
 vet: ## Static analysis
 	$(GO) vet ./...
@@ -21,11 +26,16 @@ format: ## Format code (goimports if available, then gofmt)
 lint: ## Run golangci-lint
 	golangci-lint run
 
-check: ## Run vet, lint, and tests (no writes)
+check: ## Run format, vet, lint, and test
+	@$(MAKE) format
 	@$(MAKE) vet
 	@$(MAKE) lint
 	@$(MAKE) test
 
+clean: ## Remove the built binary
+	rm -f $(BIN)
+
+# Not included: test-with-integration, clean
 all: ## Format, vet, lint, test, then build
 	@$(MAKE) format
 	@$(MAKE) vet
