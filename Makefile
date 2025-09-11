@@ -4,6 +4,8 @@ BIN := falcon
 
 export CGO_LDFLAGS ?= -Wl,-w
 
+.DEFAULT_GOAL := help
+
 .PHONY: build test vet format lint check all clean test-integration
 
 build: ## Build the CLI binary to ./falcon
@@ -44,3 +46,6 @@ all: ## Format, vet, lint, test, then build
 	@$(MAKE) lint
 	@$(MAKE) test
 	@$(MAKE) build
+
+help: ## Display this help screen
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
