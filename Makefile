@@ -3,7 +3,7 @@ PKG := ./cmd/falcon
 BIN := falcon
 
 .DEFAULT_GOAL := help
-.PHONY: build test vet format lint check all clean test-integration
+.PHONY: all build check clean format help lint test test-integration vet
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
