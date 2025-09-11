@@ -1,6 +1,6 @@
 module github.com/algorandfoundation/falcon-signatures
 
-go 1.25.0
+go 1.25
 
 require github.com/algorand/falcon v0.1.0
 
