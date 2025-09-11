@@ -2,11 +2,13 @@ GO ?= go
 PKG := ./cmd/falcon
 BIN := falcon
 
-export CGO_LDFLAGS ?= -Wl,-w
-
 .DEFAULT_GOAL := help
-
 .PHONY: build test vet format lint check all clean test-integration
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Darwin)
+	export CGO_LDFLAGS ?= -Wl,-w
+endif
 
 build: ## Build the CLI binary to ./falcon
 	$(GO) build -o $(BIN) $(PKG)
