@@ -2,6 +2,8 @@ GO ?= go
 PKG := ./cmd/falcon
 BIN := falcon
 
+export CGO_LDFLAGS ?= -Wl,-w
+
 .PHONY: build test vet format lint check all
 
 build: ## Build the CLI binary to ./falcon
