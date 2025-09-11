@@ -4,7 +4,7 @@ BIN := falcon
 
 export CGO_LDFLAGS ?= -Wl,-w
 
-.PHONY: build test vet format lint check all
+.PHONY: build test vet format lint check all clean test-integration
 
 build: ## Build the CLI binary to ./falcon
 	$(GO) build -o $(BIN) $(PKG)
@@ -14,7 +14,7 @@ test: ## Run unit tests
 	$(GO) test -race -cover ./...
 
 # Unit and integration tests (also files with //go:build integration header)
-test-with-integration: ## Run unit + integration tests
+test-integration: ## Run unit + integration tests
 	$(GO) test -race -cover -tags=integration ./...
 
 vet: ## Static analysis
@@ -37,7 +37,7 @@ check: ## Run format, vet, lint, and test
 clean: ## Remove the built binary
 	rm -f $(BIN)
 
-# Not included: test-with-integration, clean
+# Not included: test-integration, clean
 all: ## Format, vet, lint, test, then build
 	@$(MAKE) format
 	@$(MAKE) vet
