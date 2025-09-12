@@ -8,7 +8,7 @@ GOLANGCILINT_BIN := $(TOOLS_DIR)/golangci-lint
 GOIMPORTS_BIN := $(TOOLS_DIR)/goimports
 
 .DEFAULT_GOAL := help
-.PHONY: all build check clean cleantools cleanall format help install linstall-goimports install-golangci-lint int test test-integration tidy tools vet
+.PHONY: all build check clean cleantools cleanall format help install install-goimports install-golangci-lint int test test-integration tidy tools vet
 
 # Without this, 'go test -race' spits out "malformed LC_DYSYMTAB" warnings.
 # Info: https://github.com/golang/go/issues/61229#issuecomment-1988965927
@@ -78,7 +78,7 @@ $(GOLANGCILINT_BIN):
 		echo "Existing golangci-lint installation found..."; \
 		echo "Creating symlink in $(GOLANGCILINT_BIN)"; \
 	else \
-		@$(MAKE) install-golangci-lint; \
+		$(MAKE) install-golangci-lint; \
 	fi
 
 install-goimports: $(GOIMPORTS_BIN)

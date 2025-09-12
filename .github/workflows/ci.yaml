@@ -81,7 +81,7 @@ jobs:
           # If you want to use the account, store it in kmd
           #NEW_ACCOUNT=$(./goal account new | grep 'Created new account with address' | awk '{print $6}' | tr -d '\n')
 
-          # Func new account with 10 Algo
+          # Fund new account with 10 Algo
           ./goal clerk send -a 10000000 -f ${FAUCET} -t ${NEW_ACCOUNT}
 
           # Check balance
