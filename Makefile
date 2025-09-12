@@ -57,7 +57,7 @@ tidy: ## Tidy up go.mod and go.sum files
 	$(GO) mod tidy
 	@# Verify that the git repository is clean after tidy.
 	@if ! git diff --quiet go.mod go.sum; then \
-		echo "==> Please run 'go mod tidy' and commit the changes." \
+		echo "==> Please run 'go mod tidy' and commit the changes."; \
 		exit 1; \
 	fi
 
