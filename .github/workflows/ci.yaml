@@ -64,8 +64,8 @@ jobs:
       - name: Setup network
         id: algod
         run: |
-          # Change DevMode to true if you want faster tests, with fewer consensus checks
-          echo '{"Genesis":{"NetworkName":"buildnet","ConsensusProtocol":"future","LastPartKeyRound":2000,"Wallets":[{"Name":"Wallet1","Stake":100,"Online":true}],"DevMode":false},"Nodes":[{"Name":"node1","Wallets":[{"Name":"Wallet1"}]}]}' >> buildnet.json
+          # Change DevMode to false if you're doing consensus-related tests
+          echo '{"Genesis":{"NetworkName":"buildnet","ConsensusProtocol":"future","LastPartKeyRound":2000,"Wallets":[{"Name":"Wallet1","Stake":100,"Online":true}],"DevMode":true},"Nodes":[{"Name":"node1","Wallets":[{"Name":"Wallet1"}]}]}' >> buildnet.json
           mkdir -p buildnet
           ./goal network create -t buildnet.json -r buildnet
           echo '{"EnableDeveloperAPI":true,"EnableExperimentalAPI":true}' > buildnet/node1/config.json
@@ -73,19 +73,20 @@ jobs:
           echo "ALGOD_URL=http://$(cat buildnet/node1/algod.net)" >> $GITHUB_ENV
           echo "ALGOD_TOKEN=$(cat buildnet/node1/algod.token)" >> $GITHUB_ENV
 
-      - name: Perform a transaction
+      - name: Confirming network is up
         run: |
           export ALGORAND_DATA=buildnet/node1
           FAUCET=$(./goal account list | grep 'microAlgos' | awk '{print $3}' | tr -d '\n' | head -n 1)
           NEW_ACCOUNT=$(./algokey generate | grep 'Public key' | awk '{print $3}' | tr -d '\n')
-          # If you want to use the account, store it in kmd
-          #NEW_ACCOUNT=$(./goal account new | grep 'Created new account with address' | awk '{print $6}' | tr -d '\n')
 
-          # Fund new account with 10 Algo
-          ./goal clerk send -a 10000000 -f ${FAUCET} -t ${NEW_ACCOUNT}
+          # Fund random account with 1 Algo
+          FUND_AMOUNT=1000000
+          ACCT_BAL=$(./goal account dump -a ${NEW_ACCOUNT} | jq -r '.algo // 0')
+          ./goal clerk send -a ${FUND_AMOUNT} -f ${FAUCET} -t ${NEW_ACCOUNT}
+          (( ACCT_BAL += FUND_AMOUNT ))
 
-          # Check balance
-          ./goal account dump -a ${NEW_ACCOUNT}
+          # Confirm balance or exit
+          ./goal account dump -a ${NEW_ACCOUNT} | jq -e --arg amt "${ACCT_BAL}" '.algo == ($amt | tonumber)'
 
       - name: Run integration tests
         run: |
