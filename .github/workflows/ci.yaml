@@ -69,8 +69,8 @@ jobs:
           mkdir -p buildnet
           ./goal network create -t buildnet.json -r buildnet
           # Restart KMD without a timeout
-          ./goal kmd stop
-          ./goal kmd start
+          ./goal kmd stop -d buildnet/node1
+          ./goal kmd start -d buildnet/node1
           echo '{"EnableDeveloperAPI":true,"EnableExperimentalAPI":true}' > buildnet/node1/config.json
           ./goal network start -r buildnet
           echo "ALGOD_URL=http://$(cat buildnet/node1/algod.net)" >> $GITHUB_ENV
