@@ -35,7 +35,7 @@ cleanall: clean cleantools ## Remove everything
 
 format: $(GOIMPORTS_BIN) ## Format code
 	$(GOIMPORTS_BIN) -w .
-	$(GO) fmt ./...
+	$(GO)fmt -l -s -w .
 
 help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
