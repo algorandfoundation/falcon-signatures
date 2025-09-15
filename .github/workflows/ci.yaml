@@ -13,21 +13,90 @@ jobs:
     if: (github.event.pull_request == null || !github.event.pull_request.draft)
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
+          go-version-file: 'go.mod'
 
-      - name: Install dependencies
-        run: go mod tidy
+      - name: Install goimports
+        run: make install-goimports
+
+      - name: Run checks (minus lint)
+        run: make tidy format vet
 
       - name: Run linter
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v8
         with:
           version: v2.4.0  # match pre-commit version
 
       - name: Run tests
-        run: go test ./... -v
+        run: make test
+
+      - name: Get latest go-algorand release
+        id: go-algorand
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO_NAME='algorand/go-algorand'
+          ASSET_PATTERN='^node_(beta|stable)_linux-amd64_\d+\.\d+\.\d+.tar.gz$'
+
+          # Get latest beta or stable tag
+          TAG=$(gh api repos/algorand/go-algorand/tags | jq -r --arg pattern "^v\d+\.\d+\.\d+-(beta|stable)$" '.[] | .name | select(. | test($pattern))' | sort -Vr | head -n 1)
+
+          # Use the GitHub CLI to get the latest release data.
+          RELEASE_DATA=$(gh api repos/${REPO_NAME}/releases/tags/${TAG})
+
+          # Find the download URL for the asset that matches the pattern.
+          # The 'match' function in jq uses a regular expression.
+          # We escape the pattern for use in the regex.
+          DOWNLOAD_URL=$(echo "${RELEASE_DATA}" | jq -r --arg pattern "${ASSET_PATTERN}" '.assets[] | select(.name | test($pattern)) | .browser_download_url')
+
+          if [[ -z "$DOWNLOAD_URL" ]]; then
+            echo "::error::Could not find asset matching pattern '${ASSET_PATTERN}' in the latest release."
+            exit 1
+          fi
+
+          # The -L flag is crucial for following the redirect.
+          curl -s -L -o ./algorand.tar.gz ${DOWNLOAD_URL}
+
+          tar -xvzf ./algorand.tar.gz --strip-components=1 bin/algod bin/algokey bin/goal bin/kmd
+
+      - name: Setup network
+        id: algod
+        run: |
+          # Change DevMode to false if you're doing consensus-related tests
+          echo '{"Genesis":{"NetworkName":"buildnet","ConsensusProtocol":"future","LastPartKeyRound":2000,"Wallets":[{"Name":"Wallet1","Stake":100,"Online":true}],"DevMode":true},"Nodes":[{"Name":"node1","Wallets":[{"Name":"Wallet1"}]}]}' >> buildnet.json
+          mkdir -p buildnet
+          ./goal network create -t buildnet.json -r buildnet
+          # Restart KMD without a timeout
+          ./goal kmd stop -d buildnet/node1
+          ./goal kmd start -d buildnet/node1
+          echo '{"EnableDeveloperAPI":true,"EnableExperimentalAPI":true}' > buildnet/node1/config.json
+          ./goal network start -r buildnet
+          echo "ALGOD_URL=http://$(cat buildnet/node1/algod.net)" >> $GITHUB_ENV
+          echo "ALGOD_TOKEN=$(cat buildnet/node1/algod.token)" >> $GITHUB_ENV
+          echo "KMD_URL=http://$(cat buildnet/node1/kmd-v0.5/kmd.net)" >> $GITHUB_ENV
+          echo "KMD_TOKEN=$(cat buildnet/node1/kmd-v0.5/kmd.token)" >> $GITHUB_ENV
+
+      - name: Confirming network is up
+        run: |
+          export ALGORAND_DATA=buildnet/node1
+          FAUCET=$(./goal account list | grep 'microAlgos' | awk '{print $3}' | tr -d '\n' | head -n 1)
+          NEW_ACCOUNT=$(./algokey generate | grep 'Public key' | awk '{print $3}' | tr -d '\n')
+
+          # Fund random account with 1 Algo
+          FUND_AMOUNT=1000000
+          ACCT_BAL=$(./goal account dump -a ${NEW_ACCOUNT} | jq -r '.algo // 0')
+          ./goal clerk send -a ${FUND_AMOUNT} -f ${FAUCET} -t ${NEW_ACCOUNT}
+          (( ACCT_BAL += FUND_AMOUNT ))
+
+          # Confirm balance or exit
+          ./goal account dump -a ${NEW_ACCOUNT} | jq -e --arg amt "${ACCT_BAL}" '.algo == ($amt | tonumber)'
+
+      - name: Run integration tests
+        run: |
+          make test-integration
+
+      - name: Shutdown network
+        run: |
+          ./goal network stop -r buildnet
