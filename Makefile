@@ -18,7 +18,7 @@ ifeq ($(UNAME_S), Darwin)
 	export CGO_LDFLAGS ?= -Wl,-w
 endif
 
-all: check test build ## Format, vet, lint, test, then build
+all: check test build ## tidy, format, vet, lint, test, then build
 
 build: ## Build the CLI binary to ./falcon
 	$(GO) build -o $(FALCON_BIN) $(PKG)
@@ -35,6 +35,7 @@ cleanall: clean cleantools ## Remove everything
 
 format: $(GOIMPORTS_BIN) ## Format code
 	$(GOIMPORTS_BIN) -w .
+	$(GO) fmt ./...
 
 help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
