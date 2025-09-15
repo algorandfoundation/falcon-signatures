@@ -68,10 +68,15 @@ jobs:
           echo '{"Genesis":{"NetworkName":"buildnet","ConsensusProtocol":"future","LastPartKeyRound":2000,"Wallets":[{"Name":"Wallet1","Stake":100,"Online":true}],"DevMode":true},"Nodes":[{"Name":"node1","Wallets":[{"Name":"Wallet1"}]}]}' >> buildnet.json
           mkdir -p buildnet
           ./goal network create -t buildnet.json -r buildnet
+          # Restart KMD without a timeout
+          ./goal kmd stop
+          ./goal kmd start
           echo '{"EnableDeveloperAPI":true,"EnableExperimentalAPI":true}' > buildnet/node1/config.json
           ./goal network start -r buildnet
           echo "ALGOD_URL=http://$(cat buildnet/node1/algod.net)" >> $GITHUB_ENV
           echo "ALGOD_TOKEN=$(cat buildnet/node1/algod.token)" >> $GITHUB_ENV
+          echo "KMD_URL=http://$(cat buildnet/node1/kmd-v0.5/kmd.net)" >> $GITHUB_ENV
+          echo "KMD_TOKEN=$(cat buildnet/node1/kmd-v0.5/kmd.token)" >> $GITHUB_ENV
 
       - name: Confirming network is up
         run: |
