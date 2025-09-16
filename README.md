@@ -48,7 +48,7 @@ cd falcon-signatures
 make build
 ```
 
-This creates the `falcon` binary in the current directory.
+This creates the `falcon` binary at `./build/falcon`.
 
 You can also run the tests:
 

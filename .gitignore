@@ -1,4 +1,5 @@
 .claude
+.vscode
 /build
 /.temp
 /.tools
