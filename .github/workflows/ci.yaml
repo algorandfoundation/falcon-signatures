@@ -77,6 +77,7 @@ jobs:
           echo "ALGOD_TOKEN=$(cat buildnet/node1/algod.token)" >> $GITHUB_ENV
           echo "KMD_URL=http://$(cat buildnet/node1/kmd-v0.5/kmd.net)" >> $GITHUB_ENV
           echo "KMD_TOKEN=$(cat buildnet/node1/kmd-v0.5/kmd.token)" >> $GITHUB_ENV
+          echo "ALGORAND_DATA=$PWD/buildnet/node1" >> $GITHUB_ENV
 
       - name: Confirming network is up
         run: |
