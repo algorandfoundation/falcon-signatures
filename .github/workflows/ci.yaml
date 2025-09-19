@@ -95,6 +95,11 @@ jobs:
 
       - name: Run integration tests
         run: |
+          # make the falcon binary available to integration tests
+          make build
+          # add the goal binary to PATH so tests can simply call `goal`
+          GOAL_BIN_DIR="$PWD"
+          export PATH="${GOAL_BIN_DIR}:$PATH"
           make test-integration
 
       - name: Shutdown network
