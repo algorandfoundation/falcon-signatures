@@ -1,0 +1,6 @@
+#pragma version 12
+bytecblock TMPL_COUNTER // counter
+txn TxID
+arg 0
+pushbytes TMPL_FALCON_PUBLIC_KEY
+falcon_verify

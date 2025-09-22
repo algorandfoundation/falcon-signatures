@@ -1,17 +1,14 @@
 package algorand
 
 import (
-	"context"
 	_ "embed"
-	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	"filippo.io/edwards25519"
 
-	"github.com/algorand/go-algorand-sdk/v2/client/v2/algod"
 	"github.com/algorand/go-algorand-sdk/v2/crypto"
 	"github.com/algorand/go-algorand-sdk/v2/types"
 	"github.com/algorandfoundation/falcon-signatures/falcongo"
@@ -25,73 +22,6 @@ const (
 	BetaNet
 	DevNet
 )
-
-// ❤️ nodely.dev
-const (
-	NodelyMainNetAlgodURL = "https://mainnet-api.4160.nodely.dev"
-	NodelyTestNetAlgodURL = "https://testnet-api.4160.nodely.dev"
-	NodelyBetaNetAlgodURL = "https://betanet-api.4160.nodely.dev"
-)
-
-//go:embed teal/PQlogicsig.teal
-var PQlogicsigSource string
-
-// DeriveLogicSig outputs TEAL code for a LogicSig that verifies a Falcon signature.
-// The LogicSig embeds the Falcon public key and verifies the matching private key
-// was used to sign the transaction ID.
-//
-// The dummy counter inserted in the TEAL code is used to guarantee that the LogicSig
-// escrow account address, which Algorand derives hashing the TEAL program, is not a
-// valid ed25519 public key.
-// So even a quantum computer that breaks ed25519 signatures would not be able to
-// derive a private key for the LogicSig escrow account.
-// On average it will take two attempts to find such a counter value.
-func DerivePQLogicSig(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, error) {
-	pubKeyHex := "0x" + hex.EncodeToString(publicKey[:])
-	maxIterations := 1000 // should find a counter in way less than 1000 iterations
-	teal := strings.Replace(PQlogicsigSource, "TMPL_FALCON_PUBLIC_KEY", pubKeyHex, 1)
-	teal = strings.Replace(teal, "TMPL_COUNTER", "0x00", 1)
-	for counter := range maxIterations {
-		lsig, err := CompileLogicSig(teal)
-		if err != nil {
-			return crypto.LogicSigAccount{}, err
-		}
-		lsa, err := lsig.Address()
-		if err != nil {
-			return crypto.LogicSigAccount{}, err
-		}
-		if !isOnTheCurve(lsa[:]) {
-			return lsig, nil // found a counter that works
-		}
-		oldCounterLine := fmt.Sprintf("0x%02x // counter", counter)
-		newCounterLine := fmt.Sprintf("0x%02x // counter", counter+1)
-		teal = strings.ReplaceAll(teal, oldCounterLine, newCounterLine)
-	}
-	return crypto.LogicSigAccount{},
-		fmt.Errorf("could not find a suitable counter in %d iterations", maxIterations)
-}
-
-// CompileLogicSig returns a LogicSigAccount compiled from the given TEAL code
-// We use BetaNet to get access to the latest TEAL opcodes (i.e., falcon_verify).
-func CompileLogicSig(teal string) (crypto.LogicSigAccount, error) {
-	algodClient, err := GetAlgodClient(BetaNet)
-	if err != nil {
-		return crypto.LogicSigAccount{}, err
-	}
-	result, err := algodClient.TealCompile([]byte(teal)).Do(context.Background())
-	if err != nil {
-		return crypto.LogicSigAccount{}, err
-	}
-
-	lsigBinary, err := base64.StdEncoding.DecodeString(result.Result)
-	if err != nil {
-		return crypto.LogicSigAccount{}, err
-	}
-	lsig := crypto.LogicSigAccount{
-		Lsig: types.LogicSig{Logic: lsigBinary, Args: nil},
-	}
-	return lsig, nil
-}
 
 // GetAddressFromPublicKey derives the Algorand address corresponding to the given
 // Falcon public key.
@@ -115,27 +45,89 @@ func isOnTheCurve(address []byte) bool {
 	return err == nil
 }
 
-// GetAlgodClient returns an algod client for the specified network.
-// If the ALGOD_URL environment variable is set, it uses that URL and
-// the ALGOD_TOKEN environment variable for the token (which may be empty).
-// Otherwise, it uses the nodely.dev endpoints for MainNet, TestNet, and BetaNet.
-// For DevNet, the ALGOD_URL environment variable must be set.
-func GetAlgodClient(network Network) (*algod.Client, error) {
-	u := os.Getenv("ALGOD_URL")
-	if u != "" {
-		// Token may be empty depending on the endpoint setup.
-		return algod.MakeClient(u, os.Getenv("ALGOD_TOKEN"))
+var ErrInvalidFalconPublicKey = errors.New(
+	"unsuitable Falcon public key for Algorand address")
+
+// DerivePQLogicSig returns a LogicSig that verifies a Falcon signature.
+// The LogicSig embeds the Falcon public key and verifies the matching private key
+// was used to sign the transaction ID.
+// This is a deterministic derivation according to the specification in doc.go
+func DerivePQLogicSig(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, error) {
+	maxIterations := 256
+	for counter := range maxIterations {
+		lsig := crypto.LogicSigAccount{
+			Lsig: types.LogicSig{
+				Logic: patchPrecompiledPQlogicsig(publicKey, byte(counter)),
+			},
+		}
+		lsa, err := lsig.Address()
+		if err != nil {
+			return crypto.LogicSigAccount{}, err
+		}
+		if !isOnTheCurve(lsa[:]) {
+			return lsig, nil
+		}
 	}
-	var algodURL string
-	switch network {
-	case MainNet:
-		algodURL = NodelyMainNetAlgodURL
-	case TestNet:
-		algodURL = NodelyTestNetAlgodURL
-	case BetaNet:
-		algodURL = NodelyBetaNetAlgodURL
-	case DevNet:
-		return nil, fmt.Errorf("ALGOD_URL not set for DevNet")
+	return crypto.LogicSigAccount{}, ErrInvalidFalconPublicKey
+}
+
+//go:embed teal/PQlogicsig.teal.tok
+var PQlogicsigPrecompile []byte
+
+// patchPrecompiledPQlogicsig returns the compiled PQlogicsig TEAL code
+// with the given Falcon public key and counter value
+//
+// The precompiled PQlogicsig with counter=0 and public key all zeroes is
+// pointed to by PQlogicsigPrecompile which can be used for testing, and is:
+//
+//	offset	|	bytes			| teal
+//	_______________________________________________________________________
+//	      0	|	0c				| #pragma version 12
+//	      1	|	26 01 01 00		| bytecblock 0x00
+//	      5	|	31 17			| txn TxID
+//	      7	|	2d				| arg 0
+//	      8	|	80 81 0e 00... 	| pushbytes 0x00... (1793 public key bytes)
+//	   1804	|	85				| falcon_verify
+func patchPrecompiledPQlogicsig(publicKey falcongo.PublicKey, counter byte) []byte {
+	precompiled := []byte{
+		0x0c,
+		0x26, 0x01, 0x01, 0x00,
+		0x31, 0x17,
+		0x2d,
+		0x80, 0x81, 0x0e,
 	}
-	return algod.MakeClient(algodURL, "")
+	precompiled[4] = counter
+	precompiled = append(precompiled, publicKey[:]...)
+	precompiled = append(precompiled, 0x85)
+	return precompiled
+}
+
+//go:embed teal/PQlogicsigTMPL.teal
+var PQlogicsigTMPL string
+
+// DerivePQLogicSigWithCompilation is like DerivePQLogicSig but compiles the TEAL
+// source code on the fly instead of using a precompiled version.
+// It requires an algod node to compile the TEAL code,
+func DerivePQLogicSigWithCompilation(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, error) {
+	pubKeyHex := "0x" + hex.EncodeToString(publicKey[:])
+	maxIterations := 256
+	teal := strings.Replace(PQlogicsigTMPL, "TMPL_FALCON_PUBLIC_KEY", pubKeyHex, 1)
+	teal = strings.Replace(teal, "TMPL_COUNTER", "0x00", 1)
+	for counter := range maxIterations {
+		lsig, err := CompileLogicSig(teal)
+		if err != nil {
+			return crypto.LogicSigAccount{}, err
+		}
+		lsa, err := lsig.Address()
+		if err != nil {
+			return crypto.LogicSigAccount{}, err
+		}
+		if !isOnTheCurve(lsa[:]) {
+			return lsig, nil // found a counter that works
+		}
+		oldCounterLine := fmt.Sprintf("0x%02x // counter", counter)
+		newCounterLine := fmt.Sprintf("0x%02x // counter", counter+1)
+		teal = strings.ReplaceAll(teal, oldCounterLine, newCounterLine)
+	}
+	return crypto.LogicSigAccount{}, ErrInvalidFalconPublicKey
 }

@@ -4,12 +4,14 @@ package integration
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/algorandfoundation/falcon-signatures/algorand"
+	"github.com/algorandfoundation/falcon-signatures/falcongo"
 )
 
 var (
@@ -54,8 +56,9 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-// TestAlgorandSend tests the "falcon algorand send" command.
+// TestAlgorandSend tests the "falcon algorand send" command
 func TestAlgorandSend(t *testing.T) {
+	t.Parallel()
 	tmpDir := t.TempDir()
 	keyFile := filepath.Join(tmpDir, "key.json")
 
@@ -73,27 +76,76 @@ func TestAlgorandSend(t *testing.T) {
 		"--to", address, "--amount", "1000", "--network", "devnet")
 }
 
-// TestDummyLsigCompilation tests that the precompiled dummyLsig.teal matches
-// it source teal.
-func TestDummyLsigCompilation(t *testing.T) {
-	tealPath := filepath.Join("..", "algorand", "teal", "dummyLsig.teal")
-	tealSource, err := os.ReadFile(tealPath)
-	if err != nil {
-		t.Fatalf("failed to read TEAL source %s: %v", tealPath, err)
-	}
+// TestPrecompiles tests that the precompiled .tok files match their source teal
+func TestPrecompiles(t *testing.T) {
+	t.Parallel()
 
-	compiled, err := algorand.CompileLogicSig(string(tealSource))
-	if err != nil {
-		t.Fatalf("failed to compile dummy teal: %v", err)
+	// teal, tok matching file pairs
+	files := [][2]string{
+		{
+			filepath.Join("..", "algorand", "teal", "dummyLsig.teal"),
+			filepath.Join("..", "algorand", "teal", "dummyLsig.teal.tok"),
+		},
+		{
+			filepath.Join("..", "algorand", "teal", "PQlogicsig.teal"),
+			filepath.Join("..", "algorand", "teal", "PQlogicsig.teal.tok"),
+		},
 	}
-
-	expectedPath := filepath.Join("..", "algorand", "teal", "dummyLsig.teal.tok")
-	expectedBytes, err := os.ReadFile(expectedPath)
-	if err != nil {
-		t.Fatalf("failed to read compiled TEAL %s: %v", expectedPath, err)
+	for _, pair := range files {
+		tealPath, tokPath := pair[0], pair[1]
+		tealSource, err := os.ReadFile(tealPath)
+		if err != nil {
+			t.Fatalf("failed to read TEAL source %s: %v", tealPath, err)
+		}
+		compiled, err := algorand.CompileLogicSig(string(tealSource))
+		if err != nil {
+			t.Fatalf("failed to compile dummy teal: %v", err)
+		}
+		precompiled, err := os.ReadFile(tokPath)
+		if err != nil {
+			t.Fatalf("failed to read compiled TEAL %s: %v", tokPath, err)
+		}
+		if !bytes.Equal(compiled.Lsig.Logic, precompiled) {
+			t.Fatalf("compiled bytes do not match expected bytes")
+		}
 	}
+}
 
-	if !bytes.Equal(compiled.Lsig.Logic, expectedBytes) {
-		t.Fatalf("compiled bytes do not match expected bytes")
+// TestPQLogicSigDerivationWithPrecompile tests that DerivePQLogicSig which uses
+// the precompiled TEAL gives the same result as DerivePQLogicSigWithCompilation
+// which compiles the TEAL on the fly with an algod node.
+func TestPQLogicSigDerivationWithPrecompile(t *testing.T) {
+	t.Parallel()
+	iterations := 10
+	for range iterations {
+		keyPair, err := falcongo.GenerateKeyPair(nil)
+		if err != nil {
+			t.Fatalf("failed to generate Falcon keypair: %v", err)
+		}
+		lsig1, err1 := algorand.DerivePQLogicSig(keyPair.PublicKey)
+		if err1 != nil && !errors.Is(err1, algorand.ErrInvalidFalconPublicKey) {
+			t.Fatalf("DerivePQLogicSig failed: %v", err1)
+		}
+		lsig2, err2 := algorand.DerivePQLogicSigWithCompilation(keyPair.PublicKey)
+		if err2 != nil && !errors.Is(err2, algorand.ErrInvalidFalconPublicKey) {
+			t.Fatalf("DerivePQLogicSigWithCompilation failed: %v", err2)
+		}
+		// If both functions report the “invalid key” category, that’s a valid outcome.
+		if errors.Is(err1, algorand.ErrInvalidFalconPublicKey) &&
+			errors.Is(err2, algorand.ErrInvalidFalconPublicKey) {
+			continue
+		}
+		addr1, err := lsig1.Address()
+		if err != nil {
+			t.Fatalf("lsig1.Address() failed: %v", err)
+		}
+		addr2, err := lsig2.Address()
+		if err != nil {
+			t.Fatalf("lsig2.Address() failed: %v", err)
+		}
+		if addr1 != addr2 {
+			t.Fatalf("derived addresses do not match:%s != %s for pubkey %v",
+				addr1.String(), addr2.String(), keyPair.PublicKey)
+		}
 	}
 }
