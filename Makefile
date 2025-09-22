@@ -50,8 +50,9 @@ lint: $(GOLANGCILINT_BIN) ## Run golangci-lint
 test: ## Run unit tests
 	$(GO) test -race -cover ./...
 
+
 # Unit and integration tests (also files with //go:build integration header)
-test-integration: ## Run unit + integration tests
+test-integration: build ## Run unit + integration tests
 	$(GO) test -race -cover -tags=integration ./...
 
 tidy: ## Tidy up go.mod and go.sum files

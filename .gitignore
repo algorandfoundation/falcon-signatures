@@ -1,5 +1,11 @@
+# ignore local files
 .claude
 .vscode
-/build
 /.temp
+
+# ignore build and tools directories
+/build
 /.tools
+
+# ignore any file with .env prefix
+.env*
