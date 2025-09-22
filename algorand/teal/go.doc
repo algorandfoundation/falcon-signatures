@@ -1,0 +1,20 @@
+// Package teal stores the TEAL source and compiled programs used.
+//
+// Each .teal file keeps the readable code, and the matching .tok file contains the
+// bytecode embedded elsewhere in the package.
+//
+// - PQlogicsig.teal.tok provides the precompiled bytecode that algorand/address.go
+//   patches with the caller's Falcon public key and counter value to derive the
+//   matching PQlogicsig; PQlogicsig.teal records the source code for that bytecode.
+
+// - PQlogicsigTMPL.teal supplies the template that algorand/address.go could use
+//   alternatively to derive the PQlogicsig with direct compilation; kept for testing
+//   the precompile
+//
+// - dummyLsig.teal.tok is embedded in algorand/send.go to sign the dummy padding
+//   transactions required when submitting large Falcon signature groups. The source
+//   dummyLsig.teal is kept for readability and compile-time verification in tests.
+
+// The integration tests compare these sources against the embedded bytecode to ensure the
+// checked-in TEAL remains in sync with the compiled artifacts.
+package teal
