@@ -1,12 +1,12 @@
-# falcon – a CLI tool to explore Falcon signatures
+# falcon – a CLI tool to explore FALCON signatures
 
-This repository introduces the **falcon** CLI tool, designed to facilitate exploration of the Falcon signature scheme.
+This repository introduces the **falcon** CLI tool, designed to facilitate exploration of the FALCON signature scheme.
 
-This tool is part of the R&D work to make the Algorand blockchain quantum-safe, but it can also be used independently to explore Falcon signatures.
+This tool is part of the R&D work to make the Algorand blockchain quantum-safe, but it can also be used independently to explore FALCON signatures.
 
-The tool implements the **Falcon-1024** scheme, based on [this implementation](https://github.com/algorand/falcon), using **deterministic signing** (which means signing a message with a given private key will always produce the same signature).
+The tool implements the **FALCON-1024** scheme, based on [this implementation](https://github.com/algorand/falcon), using **deterministic signing** (which means signing a message with a given private key will always produce the same signature).
 
-### Key and signature sizes (Falcon-1024)
+### Key and signature sizes (FALCON-1024)
 
 | Key type    | Size        |
 |-------------|-------------|
@@ -14,7 +14,7 @@ The tool implements the **Falcon-1024** scheme, based on [this implementation](h
 | Private key | 2,305 bytes |
 | Signature   | 1,538 bytes (uncompressed) |
 
-Falcon-1024 targets **NIST security level 5** — i.e., *at least as hard to break as brute-forcing AES-256* (~256-bit classical security).
+FALCON-1024 targets **NIST security level 5** — i.e., *at least as hard to break as brute-forcing AES-256* (~256-bit classical security).
 That’s the highest NIST Post-Quantum Cryptography category for signatures.
 
 ---
@@ -50,17 +50,7 @@ make build
 
 This creates the `falcon` binary at `./build/falcon`.
 
-You can also run the tests:
-
-```bash
-make test
-```
-
-Run static analysis:
-
-```bash
-make vet
-```
+Run `make help` to see all available commands.
 
 ---
 

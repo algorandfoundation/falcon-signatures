@@ -94,7 +94,7 @@ func runSign(args []string) int {
 
 const helpSign = `# falcon sign
 
-Sign a message using a Falcon-1024 private key.
+Sign a message using a FALCON-1024 private key.
 
 Arguments:
   --key <file>        keypair JSON file

@@ -6,21 +6,30 @@
 - `cmd_sign.go`: Implement `falcon sign` (message input, hex mode, file/stdout output).
 - `cmd_verify.go`: Implement `falcon verify` (message + signature sources, validity result, exit codes).
 - `cmd_info.go`: Implement `falcon info` (inspect key JSON and print fields).
+- `cmd_algorand.go`: Implement `falcon algorand` (Algorand-specific operations with FALCON keys).
 - `cmd_help.go`: Top-level and per-command help text routing.
-- `falcon.go`: Falcon-1024 primitives and helpers (deterministic signing via SHA-512/256 digesting + compressed signatures).
+- `falcongo/falcon.go`: Falcon-1024 primitives and helpers (deterministic signing via SHA-512/256 digesting + compressed signatures).
+- `falcongo/falcon_test.go`: Unit tests for core Falcon behaviors and sizes.
+- `algorand/`: Algorand integration package for FALCON-based accounts and logicsig derivation.
+  - `address.go`: Algorand address derivation from FALCON public keys.
+  - `address_test.go`: Tests for address derivation functionality.
+  - `algoutils.go`: Utility functions for Algorand operations.
+  - `send.go`: Transaction sending functionality.
+  - `doc.go`: Package documentation explaining FALCON-based Algorand accounts.
 - `utils.go`: Shared helpers (hex parsing, atomic file writes, key JSON I/O, fatal helpers).
-- `falcon_test.go`: Unit tests for core Falcon behaviors and sizes.
 - `cmd_*.go` tests: `cmd_create_test.go`, `cmd_sign_test.go`, `cmd_verify_test.go`, `cmd_info_test.go` validate CLI behavior.
-- `docs/*.md`: Per-command usage docs (`create.md`, `sign.md`, `verify.md`, `info.md`, `help.md`).
+- `integration/`: Integration tests for end-to-end functionality.
+- `cmd/falcon/main.go`: Alternative entrypoint (if used).
+- `docs/*.md`: Per-command usage docs (`create.md`, `sign.md`, `verify.md`, `info.md`, `help.md`, `algorand.md`).
 - `README.md`: Overview, installation, usage summary, and links to docs.
 - `Makefile`: Common developer tasks (`build`, `test`, `vet`, `format`).
 - `go.mod`, `go.sum`: Module metadata and dependencies.
 - `LICENSE`: Project license.
 
 ## Build, Test, and Development Commands
-- Build: `go build -o falcon .` produces the CLI binary in the repo root.
+- Build: `go build -o build/falcon ./cmd/falcon` produces the CLI binary at `build/falcon`.
 - Make targets:
-  - `make build`: build to `./falcon`.
+  - `make build`: build to `build/falcon`.
   - `make test`: run `go test -race -cover ./...`.
   - `make vet`: run `go vet ./...`.
   - `make format`: run `goimports` (if present), `go fmt`, and `gofmt -s -w .`.
@@ -28,7 +37,7 @@
  - After making changes: run `make format` before committing to ensure consistent formatting and imports.
 
 ## CLI Conventions
-- Subcommands: `create`, `sign`, `verify`, `info`, `help` (see `docs/*.md` for details).
+- Subcommands: `create`, `sign`, `verify`, `info`, `algorand`, `help` (see `docs/*.md` for details).
 - Exit codes: `0` success; `1` for `verify` when signature is invalid; `2` for usage, parse, or I/O errors.
 - Key JSON format: `{ "public_key": "<hex>", "private_key": "<hex>" }` (lowercase hex when written). Either field may be absent.
 - Hex handling: `parseHex` accepts optional `0x` prefix and odd nibble padding; `--hex` flag treats message as hex bytes.
@@ -41,7 +50,7 @@
 - Naming: Exported identifiers use PascalCase; package-internal use lowerCamelCase. Keep CLI commands short, verb-first.
 - Errors: Return `error`; avoid `panic` in library code. Wrap with context where helpful.
   - Note: cryptographic seeding uses `crypto/rand`; an unrecoverable failure there triggers a panic as it is considered fatal.
-- Separation: Keep CLI concerns in `cmd_*.go` and `main.go`; cryptographic logic stays in `falcon.go`; shared helpers in `utils.go`.
+- Separation: Keep CLI concerns in `cmd_*.go` and `main.go`; cryptographic logic stays in `falcongo/falcon.go`; Algorand-specific logic in `algorand/` package; shared helpers in `utils.go`.
 
 ## Testing Guidelines
 - Framework: Go `testing` package; table-driven where appropriate.

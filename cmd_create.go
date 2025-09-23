@@ -68,14 +68,13 @@ func deriveSeed(b []byte) []byte {
 	return pbkdf2.Key(b, []byte(kdfSaltStr), kdfIterations, kdfKeyLen, sha512.New)
 }
 
-// Per-command help (mirrors docs succinctly)
 const helpCreate = `# falcon create
 
-Generate a new Falcon-1024 keypair.
+Generate a new FALCON-1024 keypair.
 
 Arguments:
-  --seedphrase <text>  optional text passphrase (choose at least 12 words for security)
-  --out <file>         write keypair JSON (stdout if omitted)
+  --seed <text>  optional text passphrase (choose at least 12 words for security)
+  --out <file>   write keypair JSON (stdout if omitted)
 
 Examples:
   falcon create

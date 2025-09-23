@@ -1,6 +1,6 @@
 # falcon create
 
-Generate a new Falcon-1024 keypair.
+Generate a new FALCON-1024 keypair.
 
 #### Arguments
   - Optional:

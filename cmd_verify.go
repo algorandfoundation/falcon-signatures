@@ -106,7 +106,7 @@ func runVerify(args []string) int {
 
 const helpVerify = `# falcon verify
 
-Verify a Falcon-1024 signature.
+Verify a FALCON-1024 signature.
 
 Arguments:
   --key <file>         keypair/public key JSON file
