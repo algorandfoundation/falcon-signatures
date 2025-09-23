@@ -2,7 +2,7 @@
 
 These commands let users simulate post-quantum accounts on the Algorand blockchain using FALCON signatures.
 
-Under the hood, a logicsig signature is [created](https://github.com/algorand/falcon-signatures/blob/main/algorand/doc.go) for the user's FALCON signature and must be used to authorize transactions.
+Under the hood, a logicsig signature is [created](https://github.com/algorandfoundation/falcon-signatures/blob/main/algorand/doc.go) for the user's FALCON signature and must be used to authorize transactions.
 
 The workflow for the user is as follows:
 1. Generate a FALCON keypair.
