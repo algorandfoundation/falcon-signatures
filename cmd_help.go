@@ -8,7 +8,7 @@ import (
 )
 
 // Help text for top-level usage (kept in sync with docs).
-const topHelp = `falcon – Falcon-1024 CLI
+const topHelp = `falcon – FALCON-1024 CLI
 
 Usage:
   falcon <command> [flags]
@@ -75,29 +75,4 @@ Show general help or per-command help.
 Usage:
   falcon help
   falcon help <command>
-`
-
-const helpAlgorand = `# falcon algorand
-
-Algorand utilities powered by Falcon signatures.
-
-Usage:
-  falcon algorand address --key <file> [--out <file>]
-  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>]
-
-Subcommands:
-  address   Derive an Algorand address from a Falcon public key
-  send      Send Algos from a Falcon-controlled address
-
-Arguments (address):
-  --key <file>   keypair/public key JSON (required)
-  --out <file>   write derived address (stdout if omitted)
-
-Arguments (send):
-  --key <file>       Falcon keypair JSON (required, must include private key)
-  --to <address>     destination Algorand address (required)
-  --amount <number>  amount to send in microAlgos (required)
-  --fee <number>     fee in microAlgos (default: minimum network transaction fee)
-  --note <string>    optional transaction note
-  --network <name>   network: mainnet (default), testnet, betanet, devnet
 `

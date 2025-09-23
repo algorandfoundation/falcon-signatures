@@ -83,7 +83,7 @@ func runAlgorandAddress(args []string) int {
 // Parse flags only; functionality is not implemented yet.
 func runAlgorandSend(args []string) int {
 	fs := flag.NewFlagSet("algorand send", flag.ExitOnError)
-	keyPath := fs.String("key", "", "path to Falcon keypair JSON file")
+	keyPath := fs.String("key", "", "path to FALCON keypair JSON file")
 	to := fs.String("to", "", "Algorand destination address")
 	amount := fs.Uint64("amount", 0, "amount to send in microAlgos")
 	fee := fs.Uint64("fee", 0, "transaction fee in microAlgos (default: min network fee)")
@@ -170,3 +170,28 @@ func parseAlgorandNetwork(s string) (algorand.Network, error) {
 		return 0, fmt.Errorf("unknown network %q (valid: mainnet, testnet, betanet, devnet)", s)
 	}
 }
+
+const helpAlgorand = `# falcon algorand
+
+Algorand utilities powered by FALCON signatures.
+
+Usage:
+  falcon algorand address --key <file> [--out <file>]
+  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>]
+
+Subcommands:
+  address   Derive an Algorand address from a FALCON public key
+  send      Send Algos from a FALCON-controlled address
+
+Arguments (address):
+  --key <file>   keypair/public key JSON (required)
+  --out <file>   write derived address (stdout if omitted)
+
+Arguments (send):
+  --key <file>       FALCON keypair JSON (required, must include private key)
+  --to <address>     destination Algorand address (required)
+  --amount <number>  amount to send in microAlgos (required)
+  --fee <number>     fee in microAlgos (default: minimum network transaction fee)
+  --note <string>    optional transaction note
+  --network <name>   network: mainnet (default), testnet, betanet, devnet
+`
