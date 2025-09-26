@@ -1,13 +1,12 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `main.go`: CLI entrypoint dispatching subcommands and flags.
-- `cmd_create.go`: Implement `falcon create` (keypair generation, optional seed, file output).
-- `cmd_sign.go`: Implement `falcon sign` (message input, hex mode, file/stdout output).
-- `cmd_verify.go`: Implement `falcon verify` (message + signature sources, validity result, exit codes).
-- `cmd_info.go`: Implement `falcon info` (inspect key JSON and print fields).
-- `cmd_algorand.go`: Implement `falcon algorand` (Algorand-specific operations with FALCON keys).
-- `cmd_help.go`: Top-level and per-command help text routing.
+- `cmd/falcon/main.go`: CLI binary entrypoint invoking the reusable CLI package.
+- `cli/`: CLI package with subcommand dispatchers and shared helpers.
+  - `cli/cli.go`: Top-level dispatcher exposing `Main`/`Run`.
+  - `cli/create.go`, `cli/sign.go`, `cli/verify.go`, `cli/info.go`, `cli/algorand.go`, `cli/help.go`: Implement subcommands.
+  - `cli/utils.go`: Shared helpers (hex parsing, atomic file writes, key JSON I/O).
+- `cli/*_test.go`: Tests validating CLI behavior (`create_test.go`, `sign_test.go`, `verify_test.go`, `info_test.go`).
 - `falcongo/falcon.go`: Falcon-1024 primitives and helpers (deterministic signing via SHA-512/256 digesting + compressed signatures).
 - `falcongo/falcon_test.go`: Unit tests for core Falcon behaviors and sizes.
 - `algorand/`: Algorand integration package for FALCON-based accounts and logicsig derivation.
@@ -17,9 +16,7 @@
   - `send.go`: Transaction sending functionality.
   - `doc.go`: Package documentation explaining FALCON-based Algorand accounts.
 - `utils.go`: Shared helpers (hex parsing, atomic file writes, key JSON I/O, fatal helpers).
-- `cmd_*.go` tests: `cmd_create_test.go`, `cmd_sign_test.go`, `cmd_verify_test.go`, `cmd_info_test.go` validate CLI behavior.
 - `integration/`: Integration tests for end-to-end functionality.
-- `cmd/falcon/main.go`: Alternative entrypoint (if used).
 - `docs/*.md`: Per-command usage docs (`create.md`, `sign.md`, `verify.md`, `info.md`, `help.md`, `algorand.md`).
 - `README.md`: Overview, installation, usage summary, and links to docs.
 - `Makefile`: Common developer tasks (`build`, `test`, `vet`, `format`).
@@ -50,7 +47,7 @@
 - Naming: Exported identifiers use PascalCase; package-internal use lowerCamelCase. Keep CLI commands short, verb-first.
 - Errors: Return `error`; avoid `panic` in library code. Wrap with context where helpful.
   - Note: cryptographic seeding uses `crypto/rand`; an unrecoverable failure there triggers a panic as it is considered fatal.
-- Separation: Keep CLI concerns in `cmd_*.go` and `main.go`; cryptographic logic stays in `falcongo/falcon.go`; Algorand-specific logic in `algorand/` package; shared helpers in `utils.go`.
+- Separation: Keep CLI concerns in the `cli/` package; cryptographic logic stays in `falcongo/`; Algorand-specific logic in `algorand/`; shared CLI helpers live in `cli/utils.go`.
 
 ## Testing Guidelines
 - Framework: Go `testing` package; table-driven where appropriate.
