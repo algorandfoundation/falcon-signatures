@@ -1,7 +1,7 @@
 package main
 
 import (
-	cli "github.com/algorandfoundation/falcon-signatures"
+	"github.com/algorandfoundation/falcon-signatures/cli"
 )
 
 func main() {

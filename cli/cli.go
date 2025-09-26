@@ -12,35 +12,34 @@ type keyPairJSON struct {
 
 // Main is the CLI entrypoint used by the falcon binary.
 func Main() {
-	if len(os.Args) < 2 {
-		// No subcommand -> show help
+	os.Exit(Run(os.Args[1:]))
+}
+
+// Run executes the CLI with the provided arguments and returns the exit code.
+func Run(args []string) int {
+	if len(args) < 1 {
 		fmt.Fprint(os.Stdout, topHelp)
-		os.Exit(0)
+		return 0
 	}
 
-	cmd := os.Args[1]
+	cmd := args[0]
+	remain := args[1:]
 	switch cmd {
 	case "create":
-		code := runCreate(os.Args[2:])
-		os.Exit(code)
+		return runCreate(remain)
 	case "sign":
-		code := runSign(os.Args[2:])
-		os.Exit(code)
+		return runSign(remain)
 	case "verify":
-		code := runVerify(os.Args[2:])
-		os.Exit(code)
+		return runVerify(remain)
 	case "info":
-		code := runInfo(os.Args[2:])
-		os.Exit(code)
+		return runInfo(remain)
 	case "algorand":
-		code := runAlgorand(os.Args[2:])
-		os.Exit(code)
+		return runAlgorand(remain)
 	case "help", "-h", "--help":
-		code := runHelp(os.Args[2:])
-		os.Exit(code)
+		return runHelp(remain)
 	default:
 		fmt.Fprintf(os.Stderr, "unknown command: %s\n\n", cmd)
 		fmt.Fprint(os.Stderr, topHelp)
-		os.Exit(2)
+		return 2
 	}
 }
