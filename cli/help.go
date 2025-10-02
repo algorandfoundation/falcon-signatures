@@ -19,6 +19,7 @@ Commands:
   verify   Verify a signature for a message
   info     Display information about a keypair file
   algorand Algorand utilities (address, send)
+  version  Show the CLI build version
   help     Show help (general or for a command)
 
 Run 'falcon help <command>' for details.
@@ -61,6 +62,8 @@ func lookupDoc(topic string) (string, bool) {
 		return helpInfo, true
 	case "algorand":
 		return helpAlgorand, true
+	case "version":
+		return helpVersion, true
 	case "help":
 		return helpHelp, true
 	default:
