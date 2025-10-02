@@ -1,0 +1,188 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Build check
+        run: go build ./cmd/falcon
+
+      - name: Run tests
+        run: go test ./...
+
+  build:
+    name: Build binaries
+    needs: validate
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+            cc: gcc
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-latest
+            cc: aarch64-linux-gnu-gcc
+          - goos: darwin
+            goarch: amd64
+            runner: macos-13
+            cc: clang
+          - goos: darwin
+            goarch: arm64
+            runner: macos-14
+            cc: clang
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0  # Fetch all history for changelog generation
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Install cross-compilation toolchain
+        if: matrix.goos == 'linux' && matrix.goarch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Building version: ${VERSION}"
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+          CC: ${{ matrix.cc }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          LDFLAGS="-X github.com/algorandfoundation/falcon-signatures/cli.version=${VERSION}"
+          OUTPUT_NAME="falcon-${{ matrix.goos }}-${{ matrix.goarch }}"
+
+          go build -ldflags="${LDFLAGS}" -o "${OUTPUT_NAME}" ./cmd/falcon
+
+          # Verify the binary was created
+          ls -lh "${OUTPUT_NAME}"
+
+          # Compress binary to preserve permissions and reduce size
+          tar -czf "${OUTPUT_NAME}.tar.gz" "${OUTPUT_NAME}"
+          ls -lh "${OUTPUT_NAME}.tar.gz"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: falcon-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: falcon-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0  # Fetch all history for changelog
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+          # Move all compressed binaries to release directory
+          find artifacts -type f -name 'falcon-*.tar.gz' -exec mv {} release/ \;
+          ls -lh release/
+
+      - name: Generate checksums
+        run: |
+          cd release
+          sha256sum falcon-*.tar.gz > checksums.txt
+          cat checksums.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the previous tag
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 ${CURRENT_TAG}^ 2>/dev/null || echo "")
+
+          echo "Current tag: ${CURRENT_TAG}"
+          echo "Previous tag: ${PREVIOUS_TAG}"
+
+          # Generate changelog
+          if [ -z "${PREVIOUS_TAG}" ]; then
+            # First release - list all commits
+            echo "## Changes" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"* %s (%h)" >> CHANGELOG.md
+          else
+            # List commits between previous and current tag
+            echo "## Changes since ${PREVIOUS_TAG}" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"* %s (%h)" >> CHANGELOG.md
+          fi
+
+          echo "" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "## Assets" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Download the binary for your platform:" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "- **Linux (amd64)**: \`falcon-linux-amd64.tar.gz\`" >> CHANGELOG.md
+          echo "- **Linux (arm64)**: \`falcon-linux-arm64.tar.gz\`" >> CHANGELOG.md
+          echo "- **macOS (Intel)**: \`falcon-darwin-amd64.tar.gz\`" >> CHANGELOG.md
+          echo "- **macOS (Apple Silicon)**: \`falcon-darwin-arm64.tar.gz\`" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Extract with: \`tar -xzf falcon-{platform}-{arch}.tar.gz\`" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "Verify downloads with \`checksums.txt\` (SHA256):" >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+          cat release/checksums.txt >> CHANGELOG.md
+          echo "\`\`\`" >> CHANGELOG.md
+
+          cat CHANGELOG.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836 # v2.3.3
+        with:
+          body_path: CHANGELOG.md
+          files: |
+            release/falcon-linux-amd64.tar.gz
+            release/falcon-linux-arm64.tar.gz
+            release/falcon-darwin-amd64.tar.gz
+            release/falcon-darwin-arm64.tar.gz
+            release/checksums.txt
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
