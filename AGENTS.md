@@ -4,7 +4,7 @@
 - `cmd/falcon/main.go`: CLI binary entrypoint invoking the reusable CLI package.
 - `cli/`: CLI package with subcommand dispatchers and shared helpers.
   - `cli/cli.go`: Top-level dispatcher exposing `Main`/`Run`.
-  - `cli/create.go`, `cli/sign.go`, `cli/verify.go`, `cli/info.go`, `cli/algorand.go`, `cli/help.go`: Implement subcommands.
+  - `cli/create.go`, `cli/sign.go`, `cli/verify.go`, `cli/info.go`, `cli/algorand.go`, `cli/version.go`, `cli/help.go`: Implement subcommands.
   - `cli/utils.go`: Shared helpers (hex parsing, atomic file writes, key JSON I/O).
 - `cli/*_test.go`: Tests validating CLI behavior (`create_test.go`, `sign_test.go`, `verify_test.go`, `info_test.go`).
 - `falcongo/falcon.go`: Falcon-1024 primitives and helpers (deterministic signing via SHA-512/256 digesting + compressed signatures).
@@ -17,7 +17,7 @@
   - `doc.go`: Package documentation explaining FALCON-based Algorand accounts.
 - `utils.go`: Shared helpers (hex parsing, atomic file writes, key JSON I/O, fatal helpers).
 - `integration/`: Integration tests for end-to-end functionality.
-- `docs/*.md`: Per-command usage docs (`create.md`, `sign.md`, `verify.md`, `info.md`, `help.md`, `algorand.md`).
+- `docs/*.md`: Per-command usage docs (`create.md`, `sign.md`, `verify.md`, `info.md`, `algorand.md`, `version.md`, `help.md`).
 - `README.md`: Overview, installation, usage summary, and links to docs.
 - `Makefile`: Common developer tasks (`build`, `test`, `vet`, `format`).
 - `go.mod`, `go.sum`: Module metadata and dependencies.
@@ -34,7 +34,7 @@
  - After making changes: run `make format` before committing to ensure consistent formatting and imports.
 
 ## CLI Conventions
-- Subcommands: `create`, `sign`, `verify`, `info`, `algorand`, `help` (see `docs/*.md` for details).
+- Subcommands: `create`, `sign`, `verify`, `info`, `algorand`, `version`, `help` (see `docs/*.md` for details).
 - Exit codes: `0` success; `1` for `verify` when signature is invalid; `2` for usage, parse, or I/O errors.
 - Key JSON format: `{ "public_key": "<hex>", "private_key": "<hex>" }` (lowercase hex when written). Either field may be absent.
 - Hex handling: `parseHex` accepts optional `0x` prefix and odd nibble padding; `--hex` flag treats message as hex bytes.

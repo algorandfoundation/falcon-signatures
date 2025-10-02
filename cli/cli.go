@@ -35,6 +35,8 @@ func Run(args []string) int {
 		return runInfo(remain)
 	case "algorand":
 		return runAlgorand(remain)
+	case "version":
+		return runVersion(remain)
 	case "help", "-h", "--help":
 		return runHelp(remain)
 	default:

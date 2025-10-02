@@ -63,6 +63,7 @@ falcon create   : Create a new keypair
 falcon sign     : Sign a message
 falcon verify   : Verify a signature for a message
 falcon info     : Display information about a keypair file
+falcon version  : Show the CLI build version
 falcon help     : Show help
 - -
 falcon algorand : Algorand-specific commands
@@ -74,6 +75,7 @@ Detailed command syntax lives in per-command docs:
 - [`falcon sign`](docs/sign.md)
 - [`falcon verify`](docs/verify.md)
 - [`falcon info`](docs/info.md)
+- [`falcon version`](docs/version.md)
 - [`falcon help`](docs/help.md)
 - [`falcon algorand`](docs/algorand.md)
 

@@ -7,6 +7,9 @@ FALCON_BIN := $(OUTPUT_DIR)/falcon
 GOLANGCILINT_BIN := $(TOOLS_DIR)/golangci-lint
 GOIMPORTS_BIN := $(TOOLS_DIR)/goimports
 
+VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+LDFLAGS := -X github.com/algorandfoundation/falcon-signatures/cli.version=$(VERSION)
+
 .DEFAULT_GOAL := help
 .PHONY: all build check clean cleantools cleanall format help install install-goimports install-golangci-lint test test-integration tidy tools vet
 
@@ -21,7 +24,7 @@ endif
 all: check test build ## tidy, format, vet, lint, test, then build
 
 build: ## Build the CLI binary to ./falcon
-	$(GO) build -o $(FALCON_BIN) $(PKG)
+	$(GO) build -ldflags="$(LDFLAGS)" -o $(FALCON_BIN) $(PKG)
 
 check: tidy format vet lint ## Run format, vet, and lint
 
