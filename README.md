@@ -6,8 +6,6 @@ This tool is part of the R&D work to make the Algorand blockchain quantum-safe, 
 
 The tool implements the **FALCON-1024** scheme, based on [this implementation](https://github.com/algorand/falcon), using **deterministic signing** (which means signing a message with a given private key will always produce the same signature).
 
-### Key and signature sizes (FALCON-1024)
-
 | Key type    | Size        |
 |-------------|-------------|
 | Public key  | 1,793 bytes |
@@ -21,9 +19,10 @@ That’s the highest NIST Post-Quantum Cryptography category for signatures.
 
 ## Installation
 
-You need Go installed.
 
-To install directly:
+#### Install via `go install`
+
+If you have Go1.21+ installed, you can install directly with:
 
 ```bash
 go install github.com/algorandfoundation/falcon-signatures/cmd/falcon@latest
@@ -40,7 +39,15 @@ falcon help
 
 ---
 
-### Build from source
+#### Pre-built binaries
+
+Pre-built binaries are available on the [releases page](https://github.com/algorandfoundation/falcon-signatures/releases)
+
+---
+
+#### Build from source
+
+You need Go1.25+ to build from source:
 
 ```bash
 git clone https://github.com/algorandfoundation/falcon-signatures.git
@@ -58,26 +65,15 @@ Run `make help` to see all available commands.
 
 Available commands:
 
-```
-falcon create   : Create a new keypair
-falcon sign     : Sign a message
-falcon verify   : Verify a signature for a message
-falcon info     : Display information about a keypair file
-falcon version  : Show the CLI build version
-falcon help     : Show help
-- -
-falcon algorand : Algorand-specific commands
-```
-
-Detailed command syntax lives in per-command docs:
-
-- [`falcon create`](docs/create.md)
-- [`falcon sign`](docs/sign.md)
-- [`falcon verify`](docs/verify.md)
-- [`falcon info`](docs/info.md)
-- [`falcon version`](docs/version.md)
-- [`falcon help`](docs/help.md)
-- [`falcon algorand`](docs/algorand.md)
+| Command | Description |
+| --- | --- |
+| [`falcon create`](docs/create.md) | Create a new keypair |
+| [`falcon sign`](docs/sign.md) | Sign a message |
+| [`falcon verify`](docs/verify.md) | Verify a signature for a message |
+| [`falcon info`](docs/info.md) | Display information about a keypair file |
+| [`falcon version`](docs/version.md) | Show the CLI build version |
+| [`falcon help`](docs/help.md) | Show help |
+| [`falcon algorand`](docs/algorand.md) | Algorand-specific commands |
 
 ---
 
