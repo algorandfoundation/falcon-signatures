@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"runtime/debug"
 )
 
 // version holds the build version string injected at link-time.
@@ -15,13 +16,25 @@ func runVersion(args []string) int {
 		return 2
 	}
 
-	fmt.Fprintln(os.Stdout, version)
+	builtVersion := version
+	if builtVersion == "" {
+		builtVersion = "dev"
+	}
+	if builtVersion == "dev" {
+		if buildInfo, ok := debug.ReadBuildInfo(); ok {
+			if v := buildInfo.Main.Version; v != "" && v != "(devel)" {
+				builtVersion = v
+			}
+		}
+	}
+
+	fmt.Fprintln(os.Stdout, builtVersion)
 	return 0
 }
 
 const helpVersion = `# falcon version
 
-Show the CLI build version. Local builds print "dev"; released binaries include their release version.
+Show the CLI build version. Local builds print "dev"; binaries installed via go install or release builds include their tagged version.
 
 Usage:
   falcon version
