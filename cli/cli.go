@@ -6,8 +6,10 @@ import (
 )
 
 type keyPairJSON struct {
-	PublicKey  string `json:"public_key,omitempty"`
-	PrivateKey string `json:"private_key,omitempty"`
+	PublicKey          string `json:"public_key,omitempty"`
+	PrivateKey         string `json:"private_key,omitempty"`
+	Mnemonic           string `json:"mnemonic,omitempty"`
+	MnemonicPassphrase string `json:"mnemonic_passphrase,omitempty"`
 }
 
 // Main is the CLI entrypoint used by the falcon binary.

@@ -1,10 +1,17 @@
 # falcon info
 
-Display information about a keypair file. Prints the public and/or private key if present.
+Display information about a keypair file. Prints the public key, private key, and mnemonic (if present).
+
+If the file contains a mnemonic without explicit keys, this command will derive them from the mnemonic.
+
+**Note:** If the file contains a mnemonic without a passphrase, you must provide the passphrase via `--mnemonic-passphrase` to derive the keys.
 
 #### Arguments
   - Required
     - `--key <file>`: path to a keypair file
+  - Optional
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it (required to reconstruct keys from mnemonic-only files)
+
 
 ## Examples
 

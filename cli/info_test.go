@@ -29,6 +29,7 @@ func captureStderr(t *testing.T, fn func()) string {
 	return string(b)
 }
 
+// TestRunInfo_PrintsBothKeys ensures both keys are displayed when present.
 func TestRunInfo_PrintsBothKeys(t *testing.T) {
 	// Deterministic keypair
 	seed := deriveSeed([]byte("info both keys seed"))
@@ -50,6 +51,7 @@ func TestRunInfo_PrintsBothKeys(t *testing.T) {
 	}
 }
 
+// TestRunInfo_PublicOnly checks output when only the public key exists.
 func TestRunInfo_PublicOnly(t *testing.T) {
 	seed := deriveSeed([]byte("info public only seed"))
 	kp, err := falcongo.GenerateKeyPair(seed)
@@ -78,6 +80,7 @@ func TestRunInfo_PublicOnly(t *testing.T) {
 	}
 }
 
+// TestRunInfo_NoKeys_Returns2AndStderr verifies missing keys trigger an error.
 func TestRunInfo_NoKeys_Returns2AndStderr(t *testing.T) {
 	dir := t.TempDir()
 	keyPath := filepath.Join(dir, "empty.json")
@@ -95,6 +98,7 @@ func TestRunInfo_NoKeys_Returns2AndStderr(t *testing.T) {
 	}
 }
 
+// TestRunInfo_MissingKeyFlag_Returns2 ensures --key is required.
 func TestRunInfo_MissingKeyFlag_Returns2(t *testing.T) {
 	var code int
 	errOut := captureStderr(t, func() { code = runInfo([]string{}) })
@@ -106,6 +110,7 @@ func TestRunInfo_MissingKeyFlag_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunInfo_MissingFile_Returns2 surfaces file not found errors.
 func TestRunInfo_MissingFile_Returns2(t *testing.T) {
 	var code int
 	errOut := captureStderr(t, func() { code = runInfo([]string{"--key", "does/not/exist.json"}) })
@@ -117,6 +122,7 @@ func TestRunInfo_MissingFile_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunInfo_InvalidJSON_Returns2 detects malformed key JSON.
 func TestRunInfo_InvalidJSON_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "bad.json")
@@ -133,6 +139,7 @@ func TestRunInfo_InvalidJSON_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunInfo_InvalidPublicHex_Returns2 reports bad public key encoding.
 func TestRunInfo_InvalidPublicHex_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "badpub.json")
@@ -151,6 +158,7 @@ func TestRunInfo_InvalidPublicHex_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunInfo_InvalidPrivateHex_Returns2 reports bad private key encoding.
 func TestRunInfo_InvalidPrivateHex_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	p := filepath.Join(dir, "badpriv.json")

@@ -4,11 +4,12 @@ Sign a message using a FALCON-1024 private key.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a keypair file
+    - `--key <file>`: path to a keypair file (may contain keys or only a mnemonic)
     - one of: `--in <file>` or `--msg <string>`: message to sign
   - Optional
     - `--hex`: treat message input as hex-encoded bytes; otherwise UTF-8 string
     - `--out <file>`: write raw signature bytes to file (if omitted, print hex to stdout)
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
 
 ## Examples
 

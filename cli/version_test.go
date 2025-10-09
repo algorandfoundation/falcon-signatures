@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TestRunVersion_PrintsInjectedVersion confirms the injected build string is printed.
 func TestRunVersion_PrintsInjectedVersion(t *testing.T) {
 	old := version
 	version = "test-build"
@@ -20,6 +21,7 @@ func TestRunVersion_PrintsInjectedVersion(t *testing.T) {
 	}
 }
 
+// TestRunVersion_WithArguments_Returns2 ensures extra arguments are rejected.
 func TestRunVersion_WithArguments_Returns2(t *testing.T) {
 	var code int
 	errOut := captureStderr(t, func() { code = runVersion([]string{"extra"}) })

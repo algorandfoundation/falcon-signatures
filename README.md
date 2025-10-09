@@ -77,6 +77,18 @@ Available commands:
 
 ---
 
+## Key Management
+
+`falcon create` generates keys using 24-word BIP-39 mnemonics by default for easy recovery.
+
+- **Default:** 256-bit entropy with mnemonic (recoverable)
+- **High security:** 384-bit entropy without mnemonic (`--no-mnemonic`)
+- **Deterministic:** Generate from custom seed (`--seed`)
+
+See [`falcon create`](docs/create.md) documentation for details.
+
+---
+
 ## License
 
 This project is licensed under the **AGPL**.

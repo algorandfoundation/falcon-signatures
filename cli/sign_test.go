@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	falconlib "github.com/algorand/falcon"
 	"github.com/algorandfoundation/falcon-signatures/falcongo"
+	"github.com/algorandfoundation/falcon-signatures/mnemonic"
 )
 
 // helper to write a keypair JSON file for tests
@@ -33,6 +35,24 @@ func writeKeypairJSON(t *testing.T, dir string, fname string, kp falcongo.KeyPai
 	return path
 }
 
+// writeMnemonicJSON writes a mnemonic JSON file for tests and returns the path.
+func writeMnemonicJSON(t *testing.T, dir, fname string, words []string, passphrase string) string {
+	obj := keyPairJSON{Mnemonic: strings.Join(words, " ")}
+	if passphrase != "" {
+		obj.MnemonicPassphrase = passphrase
+	}
+	data, err := json.Marshal(obj)
+	if err != nil {
+		t.Fatalf("marshal mnemonic json: %v", err)
+	}
+	path := filepath.Join(dir, fname)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write mnemonic json: %v", err)
+	}
+	return path
+}
+
+// TestRunSign_MsgStdout_DeterministicAndVerifiable ensures stdout signatures are deterministic and valid.
 func TestRunSign_MsgStdout_DeterministicAndVerifiable(t *testing.T) {
 	// Deterministic key from seed
 	seed := deriveSeed([]byte("unit test seed for sign"))
@@ -75,6 +95,7 @@ func TestRunSign_MsgStdout_DeterministicAndVerifiable(t *testing.T) {
 	}
 }
 
+// TestRunSign_InHexToOutFile_Verifiable confirms hex input to file output remains verifiable.
 func TestRunSign_InHexToOutFile_Verifiable(t *testing.T) {
 	// Deterministic key
 	seed := deriveSeed([]byte("unit test seed for sign hex file"))
@@ -111,6 +132,7 @@ func TestRunSign_InHexToOutFile_Verifiable(t *testing.T) {
 	}
 }
 
+// TestRunSign_MissingKey_Returns2 checks that --key is required.
 func TestRunSign_MissingKey_Returns2(t *testing.T) {
 	var code int
 	errOut := captureStderr(t, func() { code = runSign([]string{"--msg", "hello"}) })
@@ -122,6 +144,7 @@ func TestRunSign_MissingKey_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_BothMsgAndIn_Returns2 ensures mutually exclusive input flags are enforced.
 func TestRunSign_BothMsgAndIn_Returns2(t *testing.T) {
 	code := 0
 	errOut := captureStderr(t, func() {
@@ -135,6 +158,7 @@ func TestRunSign_BothMsgAndIn_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_NoneMsgNorIn_Returns2 verifies an input is mandatory.
 func TestRunSign_NoneMsgNorIn_Returns2(t *testing.T) {
 	code := 0
 	errOut := captureStderr(t, func() {
@@ -148,6 +172,7 @@ func TestRunSign_NoneMsgNorIn_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_RequiresPrivateKey_Returns2 confirms a private key is needed for signing.
 func TestRunSign_RequiresPrivateKey_Returns2(t *testing.T) {
 	// Key file with only public key
 	seed := deriveSeed([]byte("sign missing sk"))
@@ -168,6 +193,7 @@ func TestRunSign_RequiresPrivateKey_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_InvalidMsgHex_Returns2 validates hex parsing for --msg.
 func TestRunSign_InvalidMsgHex_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign invalid msg hex"))
 	kp, err := falcongo.GenerateKeyPair(seed)
@@ -187,6 +213,7 @@ func TestRunSign_InvalidMsgHex_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_FailedInFileRead_Returns2 surfaces file read errors.
 func TestRunSign_FailedInFileRead_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign missing file"))
 	kp, err := falcongo.GenerateKeyPair(seed)
@@ -206,6 +233,7 @@ func TestRunSign_FailedInFileRead_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_InvalidKeyJSON_Returns2 detects malformed key JSON.
 func TestRunSign_InvalidKeyJSON_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	keyPath := filepath.Join(dir, "bad.json")
@@ -222,6 +250,7 @@ func TestRunSign_InvalidKeyJSON_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_InvalidPublicHex_Returns2 reports bad public key encoding.
 func TestRunSign_InvalidPublicHex_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	// public invalid hex; private missing
@@ -241,6 +270,7 @@ func TestRunSign_InvalidPublicHex_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_InvalidPrivateHex_Returns2 reports bad private key encoding.
 func TestRunSign_InvalidPrivateHex_Returns2(t *testing.T) {
 	dir := t.TempDir()
 	obj := keyPairJSON{PrivateKey: "zz"}
@@ -259,6 +289,7 @@ func TestRunSign_InvalidPrivateHex_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_InvalidHexInFile_Returns2 ensures hex parsing from file fails gracefully.
 func TestRunSign_InvalidHexInFile_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign invalid file hex"))
 	kp, err := falcongo.GenerateKeyPair(seed)
@@ -281,6 +312,7 @@ func TestRunSign_InvalidHexInFile_Returns2(t *testing.T) {
 	}
 }
 
+// TestRunSign_OutWriteFails_Returns2 checks write errors bubble up.
 func TestRunSign_OutWriteFails_Returns2(t *testing.T) {
 	seed := deriveSeed([]byte("sign out write fails"))
 	kp, err := falcongo.GenerateKeyPair(seed)
@@ -298,5 +330,101 @@ func TestRunSign_OutWriteFails_Returns2(t *testing.T) {
 	}
 	if !strings.Contains(strings.ToLower(errOut), "failed to write signature") {
 		t.Fatalf("unexpected error: %q", errOut)
+	}
+}
+
+// TestRunSign_FromMnemonicOnly verifies signing when only a mnemonic is provided.
+func TestRunSign_FromMnemonicOnly(t *testing.T) {
+	words := strings.Fields("legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth title")
+	seed, err := mnemonic.SeedFromMnemonic(words, "")
+	if err != nil {
+		t.Fatalf("SeedFromMnemonic failed: %v", err)
+	}
+	kp, err := falcongo.GenerateKeyPair(seed[:])
+	if err != nil {
+		t.Fatalf("GenerateKeyPair failed: %v", err)
+	}
+	if _, err := kp.Sign([]byte("self-test")); err != nil {
+		t.Fatalf("pre-check sign failed: %v", err)
+	}
+
+	dir := t.TempDir()
+	keyPath := writeMnemonicJSON(t, dir, "mnemonic.json", words, "")
+	empty := ""
+	pubDerived, privDerived, _, err := loadKeypairFile(keyPath, &empty)
+	if err != nil {
+		t.Fatalf("loadKeypairFile failed: %v", err)
+	}
+	if len(privDerived) != len(kp.PrivateKey) {
+		t.Fatalf("expected derived private key length %d, got %d", len(kp.PrivateKey), len(privDerived))
+	}
+	if len(pubDerived) != len(kp.PublicKey) {
+		t.Fatalf("expected derived public key length %d, got %d", len(kp.PublicKey), len(pubDerived))
+	}
+	if !bytes.Equal(privDerived, kp.PrivateKey[:]) {
+		t.Fatalf("derived private key mismatch")
+	}
+	if !bytes.Equal(pubDerived, kp.PublicKey[:]) {
+		t.Fatalf("derived public key mismatch")
+	}
+
+	msg := "signing with mnemonic only"
+	var code int
+	out := captureStdout(t, func() {
+		code = runSign([]string{"--key", keyPath, "--msg", msg, "--mnemonic-passphrase", ""})
+	})
+	if code != 0 {
+		t.Fatalf("expected exit 0, got %d", code)
+	}
+
+	sigHex := strings.TrimSpace(out)
+	sigBytes, err := hex.DecodeString(sigHex)
+	if err != nil {
+		t.Fatalf("stdout not valid hex: %v", err)
+	}
+	if err := falcongo.Verify([]byte(msg), falconlib.CompressedSignature(sigBytes), kp.PublicKey); err != nil {
+		t.Fatalf("signature did not verify with mnemonic-derived key: %v", err)
+	}
+}
+
+// TestRunSign_MnemonicPassphraseRequired enforces supplying the mnemonic passphrase.
+func TestRunSign_MnemonicPassphraseRequired(t *testing.T) {
+	words := strings.Fields("legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth useful legal winner thank year wave sausage worth title")
+	passphrase := "TREZOR"
+	seed, err := mnemonic.SeedFromMnemonic(words, passphrase)
+	if err != nil {
+		t.Fatalf("SeedFromMnemonic failed: %v", err)
+	}
+	kp, err := falcongo.GenerateKeyPair(seed[:])
+	if err != nil {
+		t.Fatalf("GenerateKeyPair failed: %v", err)
+	}
+
+	dir := t.TempDir()
+	keyPath := writeMnemonicJSON(t, dir, "mnemonic-pass.json", words, "")
+
+	msg := "mnemonic passphrase test"
+	var code int
+	errOut := captureStderr(t, func() { code = runSign([]string{"--key", keyPath, "--msg", msg}) })
+	if code != 2 {
+		t.Fatalf("expected exit 2 when passphrase missing, got %d", code)
+	}
+	if !strings.Contains(errOut, "file contains mnemonic without passphrase") {
+		t.Fatalf("expected mnemonic warning about passphrase, got: %q", errOut)
+	}
+
+	var okCode int
+	out := captureStdout(t, func() {
+		okCode = runSign([]string{"--key", keyPath, "--msg", msg, "--mnemonic-passphrase", passphrase})
+	})
+	if okCode != 0 {
+		t.Fatalf("expected exit 0 with passphrase supplied, got %d", okCode)
+	}
+	sigBytes, err := hex.DecodeString(strings.TrimSpace(out))
+	if err != nil {
+		t.Fatalf("stdout not valid hex: %v", err)
+	}
+	if err := falcongo.Verify([]byte(msg), falconlib.CompressedSignature(sigBytes), kp.PublicKey); err != nil {
+		t.Fatalf("signature did not verify with passphrase: %v", err)
 	}
 }

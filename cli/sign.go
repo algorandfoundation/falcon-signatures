@@ -18,7 +18,14 @@ func runSign(args []string) int {
 	msg := fs.String("msg", "", "inline message text (alternative to --in)")
 	hexIn := fs.Bool("hex", false, "treat message as hex-encoded bytes")
 	out := fs.String("out", "", "write signature bytes to file (stdout hex if empty)")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when key file omits private key")
 	_ = fs.Parse(args)
+	passphraseProvided := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "mnemonic-passphrase" {
+			passphraseProvided = true
+		}
+	})
 
 	if *keyPath == "" {
 		fmt.Fprintf(os.Stderr, "--key is required\n")
@@ -30,7 +37,11 @@ func runSign(args []string) int {
 	}
 
 	// Load private key
-	_, priv, err := loadKeypairFile(*keyPath)
+	var override *string
+	if passphraseProvided {
+		override = mnemonicPassphrase
+	}
+	_, priv, _, err := loadKeypairFile(*keyPath, override)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
 		return 2
@@ -97,10 +108,12 @@ const helpSign = `# falcon sign
 Sign a message using a FALCON-1024 private key.
 
 Arguments:
-  --key <file>        keypair JSON file
+  --key <file>        keypair JSON file (mnemonic-only files supported)
   --in <file> | --msg <string>
   --hex               treat message as hex-encoded (utf-8 if omitted)
   --out <file>        write signature bytes (stdout hex if omitted)
+  --mnemonic-passphrase <string>
+                       mnemonic passphrase when the key file omits it
 
 Examples:
   falcon sign --key mykeys.json --msg "hello world"
