@@ -4,7 +4,7 @@ Verify a FALCON-1024 signature against a message and public key.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a keypair file (may contain only a public key or a mnemonic)
+    - `--key <file>`: path to keypair file (public key sufficient; mnemonic-only files supported)
     - one of: `--in <file>` or `--msg <string>`: message that was signed
     - one of: `--sig <file>` or `--signature <hex>`: signature to verify (`--sig` expects raw signature bytes; `--signature` expects lowercase hex)
   - Optional
