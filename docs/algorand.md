@@ -2,7 +2,7 @@
 
 These commands let users simulate post-quantum accounts on the Algorand blockchain using FALCON signatures.
 
-Under the hood, a logicsig signature is [created](https://github.com/algorandfoundation/falcon-signatures/blob/main/algorand/doc.go) for the user's FALCON signature and must be used to authorize transactions.
+Under the hood, a logicsig signature is created for the user's FALCON signature and must be used to authorize transactions (see [implementation details](https://github.com/algorandfoundation/falcon-signatures/blob/main/algorand/doc.go)).
 
 The workflow for the user is as follows:
 1. Generate a FALCON keypair.
@@ -22,9 +22,10 @@ Generate an Algorand address controlled by a FALCON public key.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a keypair file (may contain only a public key)
+    - `--key <file>`: path to a keypair file (may contain only a public key or mnemonic)
   - Optional
     - `--out <file>`: path to output file; otherwise prints to stdout
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
 
 #### Examples
 Generate an Algorand address from a FALCON public key and print to stdout:
@@ -46,13 +47,14 @@ Send Algos from an Algorand address controlled by a FALCON keypair.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a FALCON keypair file (must contain private key)
+    - `--key <file>`: path to a FALCON keypair file (must resolve to a private key; mnemonic-only files are allowed)
     - `--to <address>`: Algorand address to send to
     - `--amount <number>`: amount of microAlgos to send
   - Optional
     - `--fee <number>`: transaction fee in microAlgos (default: minimum network transaction fee)
     - `--note <string>`: optional note to include in the transaction
     - `--network <name>`: network to use: `mainnet` (default), `testnet`, `betanet`, `devnet`
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
 
 #### Examples
 Send 1 Algo (1,000,000 microAlgos) to an address using a FALCON keypair:

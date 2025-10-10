@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TestGenerateFalconKeyPair_WithoutSeed checks random key generation succeeds.
 func TestGenerateFalconKeyPair_WithoutSeed(t *testing.T) {
 	keypair1, err := GenerateKeyPair(nil)
 	if err != nil {
@@ -27,6 +28,7 @@ func TestGenerateFalconKeyPair_WithoutSeed(t *testing.T) {
 	}
 }
 
+// TestGenerateFalconKeyPair_WithEmptySeed ensures empty seeds are treated as random.
 func TestGenerateFalconKeyPair_WithEmptySeed(t *testing.T) {
 	emptySeed := []byte{}
 	keypair1, err := GenerateKeyPair(emptySeed)
@@ -44,6 +46,7 @@ func TestGenerateFalconKeyPair_WithEmptySeed(t *testing.T) {
 	}
 }
 
+// TestGenerateFalconKeyPair_WithSeed verifies deterministic key generation.
 func TestGenerateFalconKeyPair_WithSeed(t *testing.T) {
 	seed := make([]byte, 48)
 	for i := range seed {
@@ -69,6 +72,7 @@ func TestGenerateFalconKeyPair_WithSeed(t *testing.T) {
 	}
 }
 
+// TestGenerateFalconKeyPair_DifferentSeeds confirms differing seeds yield distinct keys.
 func TestGenerateFalconKeyPair_DifferentSeeds(t *testing.T) {
 	seed1 := make([]byte, 48)
 	seed2 := make([]byte, 48)
@@ -97,6 +101,7 @@ func TestGenerateFalconKeyPair_DifferentSeeds(t *testing.T) {
 	}
 }
 
+// TestSign_ValidMessage checks signing succeeds on a sample message.
 func TestSign_ValidMessage(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -132,6 +137,7 @@ func TestSign_ValidMessage(t *testing.T) {
 	}
 }
 
+// TestVerify_ValidSignature ensures a valid signature verifies.
 func TestVerify_ValidSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -156,6 +162,7 @@ func TestVerify_ValidSignature(t *testing.T) {
 	}
 }
 
+// TestVerify_InvalidSignature ensures corrupted signatures fail verification.
 func TestVerify_InvalidSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -182,6 +189,7 @@ func TestVerify_InvalidSignature(t *testing.T) {
 	}
 }
 
+// TestVerify_WrongPublicKey confirms mismatched public keys fail verification.
 func TestVerify_WrongPublicKey(t *testing.T) {
 	seed1 := make([]byte, 48)
 	seed2 := make([]byte, 48)
@@ -215,6 +223,7 @@ func TestVerify_WrongPublicKey(t *testing.T) {
 	}
 }
 
+// TestSignAndVerify_RoundTrip runs multiple sign/verify combinations successfully.
 func TestSignAndVerify_RoundTrip(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -248,6 +257,7 @@ func TestSignAndVerify_RoundTrip(t *testing.T) {
 	}
 }
 
+// TestGetFixedLengthSignature validates conversion from compressed to fixed-length form.
 func TestGetFixedLengthSignature(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -283,6 +293,7 @@ const (
 	expectedMaxCompressedSignatureSize = 1423
 )
 
+// TestFalconKeySizes asserts key and signature constants match expectations.
 func TestFalconKeySizes(t *testing.T) {
 	// Use zero-value keypair to check compile-time lengths
 	var keypair KeyPair
@@ -300,6 +311,7 @@ func TestFalconKeySizes(t *testing.T) {
 	t.Logf("Private key size: %d bytes", actualPrivateKeySize)
 }
 
+// TestFalconSignatureSize samples distributions to ensure compressed size bounds.
 func TestFalconSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -365,6 +377,7 @@ func TestFalconSignatureSize(t *testing.T) {
 	}
 }
 
+// TestFalconUncompressedSignatureSize checks constant-time signature lengths.
 func TestFalconUncompressedSignatureSize(t *testing.T) {
 	seed := make([]byte, 48)
 	if _, err := rand.Read(seed); err != nil {
@@ -421,6 +434,7 @@ func TestFalconUncompressedSignatureSize(t *testing.T) {
 	t.Logf("Uncompressed signature size: %d bytes (fixed)", len(uncompressedSignature))
 }
 
+// TestSizeConsistencyAcrossKeyPairs samples multiple keys for consistent sizes.
 func TestSizeConsistencyAcrossKeyPairs(t *testing.T) {
 	// Test that all keypairs have consistent sizes regardless of seed
 	testCases := []struct {

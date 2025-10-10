@@ -40,14 +40,25 @@ func runAlgorandAddress(args []string) int {
 	fs := flag.NewFlagSet("algorand address", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to keypair/public key JSON file")
 	out := fs.String("out", "", "write derived address to file (stdout if empty)")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
 	_ = fs.Parse(args)
+	passphraseProvided := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "mnemonic-passphrase" {
+			passphraseProvided = true
+		}
+	})
 
 	if *keyPath == "" {
 		fmt.Fprintf(os.Stderr, "--key is required\n")
 		return 2
 	}
 
-	pub, _, err := loadKeypairFile(*keyPath)
+	var override *string
+	if passphraseProvided {
+		override = mnemonicPassphrase
+	}
+	pub, _, _, err := loadKeypairFile(*keyPath, override)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
 		return 2
@@ -89,12 +100,17 @@ func runAlgorandSend(args []string) int {
 	fee := fs.Uint64("fee", 0, "transaction fee in microAlgos (default: min network fee)")
 	note := fs.String("note", "", "optional transaction note")
 	networkFlag := fs.String("network", "mainnet", "network: mainnet, testnet, betanet, devnet")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
 	_ = fs.Parse(args)
 	// Track whether the user explicitly set --fee (even if zero)
 	feeSet := false
+	passphraseProvided := false
 	fs.Visit(func(f *flag.Flag) {
 		if f.Name == "fee" {
 			feeSet = true
+		}
+		if f.Name == "mnemonic-passphrase" {
+			passphraseProvided = true
 		}
 	})
 
@@ -120,7 +136,11 @@ func runAlgorandSend(args []string) int {
 	}
 
 	// Load keypair (must include both public and private keys)
-	pub, priv, err := loadKeypairFile(*keyPath)
+	var override *string
+	if passphraseProvided {
+		override = mnemonicPassphrase
+	}
+	pub, priv, _, err := loadKeypairFile(*keyPath, override)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
 		return 2
@@ -176,22 +196,24 @@ const helpAlgorand = `# falcon algorand
 Algorand utilities powered by FALCON signatures.
 
 Usage:
-  falcon algorand address --key <file> [--out <file>]
-  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>]
+  falcon algorand address --key <file> [--out <file>] [--mnemonic-passphrase <string>]
+  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>] [--mnemonic-passphrase <string>]
 
 Subcommands:
   address   Derive an Algorand address from a FALCON public key
   send      Send Algos from a FALCON-controlled address
 
 Arguments (address):
-  --key <file>   keypair/public key JSON (required)
-  --out <file>   write derived address (stdout if omitted)
+  --key <file>              keypair/public key JSON (required)
+  --out <file>              write derived address (stdout if omitted)
+  --mnemonic-passphrase     mnemonic passphrase when the key file omits it
 
 Arguments (send):
-  --key <file>       FALCON keypair JSON (required, must include private key)
-  --to <address>     destination Algorand address (required)
-  --amount <number>  amount to send in microAlgos (required)
-  --fee <number>     fee in microAlgos (default: minimum network transaction fee)
-  --note <string>    optional transaction note
-  --network <name>   network: mainnet (default), testnet, betanet, devnet
+  --key <file>              FALCON keypair JSON (required, must include private key)
+  --to <address>            destination Algorand address (required)
+  --amount <number>         amount to send in microAlgos (required)
+  --fee <number>            fee in microAlgos (default: minimum network transaction fee)
+  --note <string>           optional transaction note
+  --network <name>          network: mainnet (default), testnet, betanet, devnet
+  --mnemonic-passphrase     mnemonic passphrase when the key file omits it
 `

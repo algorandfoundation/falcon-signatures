@@ -19,7 +19,14 @@ func runVerify(args []string) int {
 	hexIn := fs.Bool("hex", false, "treat message as hex-encoded bytes")
 	sigFile := fs.String("sig", "", "file containing signature bytes (alternative to --signature)")
 	sigHex := fs.String("signature", "", "hex-encoded signature (alternative to --sig)")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
 	_ = fs.Parse(args)
+	passphraseProvided := false
+	fs.Visit(func(f *flag.Flag) {
+		if f.Name == "mnemonic-passphrase" {
+			passphraseProvided = true
+		}
+	})
 
 	if *keyPath == "" {
 		fmt.Fprintf(os.Stderr, "--key is required\n")
@@ -34,7 +41,11 @@ func runVerify(args []string) int {
 		return 2
 	}
 
-	pub, _, err := loadKeypairFile(*keyPath)
+	var override *string
+	if passphraseProvided {
+		override = mnemonicPassphrase
+	}
+	pub, _, _, err := loadKeypairFile(*keyPath, override)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to read --key: %v\n", err)
 		return 2
@@ -113,6 +124,8 @@ Arguments:
   --in <file>  | --msg <string>
   --sig <file> | --signature <hex>
   --hex                treat message as hex-encoded (utf-8 if omitted)
+  --mnemonic-passphrase <string>
+                       mnemonic passphrase when the key file omits it
 
 Examples:
   falcon verify --key pubkey.json --in message.txt --sig signature.sig
