@@ -22,7 +22,7 @@ Generate an Algorand address controlled by a FALCON public key.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a keypair file (may contain only a public key or mnemonic)
+    - `--key <file>`: path to keypair file (public key sufficient; mnemonic-only files supported)
   - Optional
     - `--out <file>`: path to output file; otherwise prints to stdout
     - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
@@ -47,7 +47,7 @@ Send Algos from an Algorand address controlled by a FALCON keypair.
 
 #### Arguments
   - Required
-    - `--key <file>`: path to a FALCON keypair file (must resolve to a private key; mnemonic-only files are allowed)
+    - `--key <file>`: path to keypair file (must include private key; mnemonic-only files supported)
     - `--to <address>`: Algorand address to send to
     - `--amount <number>`: amount of microAlgos to send
   - Optional
