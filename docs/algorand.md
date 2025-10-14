@@ -54,7 +54,9 @@ Send Algos from an Algorand address controlled by a FALCON keypair.
     - `--fee <number>`: transaction fee in microAlgos (default: minimum network transaction fee)
     - `--note <string>`: optional note to include in the transaction
     - `--network <name>`: network to use: `mainnet` (default), `testnet`, `betanet`, `devnet`
-    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
+    - `--algod-url <string>`: override algod endpoint URL (sets `ALGOD_URL`; pass `""` to reset to defaults)
+    - `--algod-token <string>`: algod API token (sets `ALGOD_TOKEN`; requires `--algod-url`; pass `""` to clear)
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase if used and key file omits it (when using mnemonic-only files)
 
 #### Examples
 Send 1 Algo (1,000,000 microAlgos) to an address using a FALCON keypair:
@@ -78,6 +80,8 @@ falcon algorand send --key keypair.json --to TESTNETADDR... --amount 500000 --fe
 ```
 
 **Note**:<br>
-if environment variable `ALGOD_URL` is set, then the program will use that Algorand node (reading `ALGOD_TOKEN` as well if set).<br>
-If not set, Nodely endpoints will be used.<br>
-For `--network devnet`, `ALGOD_URL` (and optionally `ALGOD_TOKEN`) must be set to point to your node.
+Pass `--algod-url`/`--algod-token` to use your preferred algod endpoints.<br>
+If not passed, the env vars `ALGOD_URL` and `ALGOD_TOKEN` will be used.<br>
+If unset or empty, Nodely endpoints will be used by default.<br>
+You can also pass `--algod-url ""` to reset to the default Nodely endpoints.<br>
+For `--network devnet`, provide an algod endpoint via either the flags or the `ALGOD_URL` environment variable (and `ALGOD_TOKEN` if required by your node).

@@ -40,7 +40,7 @@ func runAlgorandAddress(args []string) int {
 	fs := flag.NewFlagSet("algorand address", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to keypair/public key JSON file")
 	out := fs.String("out", "", "write derived address to file (stdout if empty)")
-	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase (if used and key file omits it)")
 	_ = fs.Parse(args)
 	passphraseProvided := false
 	fs.Visit(func(f *flag.Flag) {
@@ -100,17 +100,27 @@ func runAlgorandSend(args []string) int {
 	fee := fs.Uint64("fee", 0, "transaction fee in microAlgos (default: min network fee)")
 	note := fs.String("note", "", "optional transaction note")
 	networkFlag := fs.String("network", "mainnet", "network: mainnet, testnet, betanet, devnet")
-	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase (if used and key file omits it)")
+	algodURL := fs.String("algod-url", "", "set algod API endpoint (optional)")
+	algodToken := fs.String("algod-token", "", "set algod API token (optional); requires --algod-url")
 	_ = fs.Parse(args)
 	// Track whether the user explicitly set --fee (even if zero)
 	feeSet := false
 	passphraseProvided := false
+	algodURLProvided := false
+	algodTokenProvided := false
 	fs.Visit(func(f *flag.Flag) {
 		if f.Name == "fee" {
 			feeSet = true
 		}
 		if f.Name == "mnemonic-passphrase" {
 			passphraseProvided = true
+		}
+		if f.Name == "algod-url" {
+			algodURLProvided = true
+		}
+		if f.Name == "algod-token" {
+			algodTokenProvided = true
 		}
 	})
 
@@ -125,6 +135,16 @@ func runAlgorandSend(args []string) int {
 	}
 	if *amount == 0 {
 		fmt.Fprintf(os.Stderr, "--amount is required and must be > 0\n")
+		return 2
+	}
+	if algodTokenProvided && !algodURLProvided {
+		fmt.Fprintf(os.Stderr, "--algod-token requires --algod-url\n")
+		return 2
+	}
+	trimmedAlgodURL := strings.TrimSpace(*algodURL)
+	trimmedAlgodToken := strings.TrimSpace(*algodToken)
+	if algodURLProvided && trimmedAlgodURL == "" && algodTokenProvided && trimmedAlgodToken != "" {
+		fmt.Fprintf(os.Stderr, "--algod-token requires a non-empty --algod-url\n")
 		return 2
 	}
 
@@ -164,6 +184,18 @@ func runAlgorandSend(args []string) int {
 		Note:       []byte(*note),
 		UseFlatFee: feeSet,
 	}
+	if algodURLProvided {
+		if err := os.Setenv("ALGOD_URL", trimmedAlgodURL); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to set ALGOD_URL: %v\n", err)
+			return 2
+		}
+		if algodTokenProvided {
+			if err := os.Setenv("ALGOD_TOKEN", trimmedAlgodToken); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to set ALGOD_TOKEN: %v\n", err)
+				return 2
+			}
+		}
+	}
 
 	txID, err := algorand.Send(kp, *to, *amount, opt)
 	if err != nil {
@@ -197,7 +229,7 @@ Algorand utilities powered by FALCON signatures.
 
 Usage:
   falcon algorand address --key <file> [--out <file>] [--mnemonic-passphrase <string>]
-  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>] [--mnemonic-passphrase <string>]
+  falcon algorand send --key <file> --to <address> --amount <number> [--fee <number>] [--note <string>] [--network <name>] [--algod-url <string>] [--algod-token <string>] [--mnemonic-passphrase <string>]
 
 Subcommands:
   address   Derive an Algorand address from a FALCON public key
@@ -206,7 +238,7 @@ Subcommands:
 Arguments (address):
   --key <file>              keypair/public key JSON (required)
   --out <file>              write derived address (stdout if omitted)
-  --mnemonic-passphrase     mnemonic passphrase when the key file omits it
+  --mnemonic-passphrase     optional mnemonic passphrase when the key file omits it
 
 Arguments (send):
   --key <file>              FALCON keypair JSON (required, must include private key)
@@ -215,5 +247,7 @@ Arguments (send):
   --fee <number>            fee in microAlgos (default: minimum network transaction fee)
   --note <string>           optional transaction note
   --network <name>          network: mainnet (default), testnet, betanet, devnet
-  --mnemonic-passphrase     mnemonic passphrase when the key file omits it
+  --algod-url <string>      optional algod endpoint URL
+  --algod-token <string>    optional algod API token (requires --algod-url)
+  --mnemonic-passphrase     optional mnemonic passphrase when the key file omits it
 `

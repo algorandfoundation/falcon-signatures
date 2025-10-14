@@ -18,7 +18,7 @@ import (
 // ---- create ----
 func runCreate(args []string) int {
 	fs := flag.NewFlagSet("create", flag.ExitOnError)
-	seedText := fs.String("seed", "", "text seed/passphrase (KDF 100k iters, fixed salt)")
+	seedText := fs.String("seed", "", "generate deterministic keypair from seed/passphrase without mnemonic")
 	out := fs.String("out", "", "write keypair JSON to file (stdout if empty)")
 	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "optional mnemonic passphrase used for BIP-39 seed derivation")
 	noMnemonic := fs.Bool("no-mnemonic", false, "generate a random keypair without mnemonic (384-bit entropy)")

@@ -12,7 +12,7 @@ import (
 func runInfo(args []string) int {
 	fs := flag.NewFlagSet("info", flag.ExitOnError)
 	keyPath := fs.String("key", "", "path to keypair JSON file")
-	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase (if used and key file omits it)")
 	_ = fs.Parse(args)
 	passphraseProvided := false
 	fs.Visit(func(f *flag.Flag) {

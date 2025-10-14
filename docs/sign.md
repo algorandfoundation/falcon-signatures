@@ -9,7 +9,7 @@ Sign a message using a FALCON-1024 private key.
   - Optional
     - `--hex`: treat message input as hex-encoded bytes; otherwise UTF-8 string
     - `--out <file>`: write raw signature bytes to file (if omitted, print hex to stdout)
-    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase if used and key file omits it (when using mnemonic-only files)
 
 ## Examples
 
