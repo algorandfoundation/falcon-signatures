@@ -9,7 +9,7 @@ Verify a FALCON-1024 signature against a message and public key.
     - one of: `--sig <file>` or `--signature <hex>`: signature to verify (`--sig` expects raw signature bytes; `--signature` expects lowercase hex)
   - Optional
     - `--hex`: treat message as hex-encoded bytes; otherwise UTF-8 string
-    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase if used and key file omits it (when using mnemonic-only files)
 
 ## Examples
 

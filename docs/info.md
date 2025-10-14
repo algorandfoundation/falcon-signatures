@@ -10,7 +10,7 @@ If the file contains a mnemonic without explicit keys, this command will derive 
   - Required
     - `--key <file>`: path to a keypair file
   - Optional
-    - `--mnemonic-passphrase <string>`: mnemonic passphrase when the key file omits it (required to reconstruct keys from mnemonic-only files)
+    - `--mnemonic-passphrase <string>`: mnemonic passphrase if used and key file omits it (when using mnemonic-only files)
 
 
 ## Examples

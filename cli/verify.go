@@ -19,7 +19,7 @@ func runVerify(args []string) int {
 	hexIn := fs.Bool("hex", false, "treat message as hex-encoded bytes")
 	sigFile := fs.String("sig", "", "file containing signature bytes (alternative to --signature)")
 	sigHex := fs.String("signature", "", "hex-encoded signature (alternative to --sig)")
-	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when the key file omits it")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase (if used and key file omits it)")
 	_ = fs.Parse(args)
 	passphraseProvided := false
 	fs.Visit(func(f *flag.Flag) {

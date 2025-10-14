@@ -18,7 +18,7 @@ func runSign(args []string) int {
 	msg := fs.String("msg", "", "inline message text (alternative to --in)")
 	hexIn := fs.Bool("hex", false, "treat message as hex-encoded bytes")
 	out := fs.String("out", "", "write signature bytes to file (stdout hex if empty)")
-	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase when key file omits private key")
+	mnemonicPassphrase := fs.String("mnemonic-passphrase", "", "mnemonic passphrase (if used and key file omits it)")
 	_ = fs.Parse(args)
 	passphraseProvided := false
 	fs.Visit(func(f *flag.Flag) {

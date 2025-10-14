@@ -20,7 +20,7 @@ const (
 
 // CompileLogicSig returns a LogicSigAccount compiled from the given TEAL code
 func CompileLogicSig(teal string) (crypto.LogicSigAccount, error) {
-	// We use BetaNet to get access to the latest TEAL opcodes (i.e., falcon_verify).
+	// We use BetaNet by default to get access to the latest TEAL opcodes
 	algodClient, err := GetAlgodClient(BetaNet)
 	if err != nil {
 		return crypto.LogicSigAccount{}, err
