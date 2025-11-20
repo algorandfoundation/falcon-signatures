@@ -156,13 +156,18 @@ const helpCreate = `# falcon create
 
 Generate a new FALCON-1024 keypair.
 
-Arguments:
-  --out <file>				  write keypair JSON (stdout if omitted)
+Modes:
+  default                     generate a 24-word BIP-39 mnemonic and derive the key (256-bit entropy)
+  --no-mnemonic               generate a random keypair without a mnemonic (384-bit entropy)
+  --seed <text>               deterministically derive the keypair from a text seed
+                                (entropy depends on text seed; USE WITH CAUTION)
+  --from-mnemonic <24 words>  recover the keypair from a 24-word BIP-39 mnemonic
+
+Options:
+  --out <file>                write keypair JSON (stdout if omitted)
   --mnemonic-passphrase <string>
-                              optional mnemonic passphrase (stored in JSON when set)
-  --no-mnemonic               generate a random keypair with 384-bit entropy (no mnemonic)
-  --seed <text>               generate a deterministic keypair from provided passphrase (no mnemonic)
-  --from-mnemonic <24 words>  recover keypair from a 24-word BIP-39 mnemonic
+                              optional BIP-39 passphrase mixed into seed derivation (stored in JSON when provided);
+                                use with default mode or --from-mnemonic
 
 Examples:
   falcon create
