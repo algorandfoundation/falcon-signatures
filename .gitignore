@@ -9,3 +9,6 @@
 
 # ignore any file with .env prefix
 .env*
+
+# ignore ide specific files
+.idea/
