@@ -1,0 +1,74 @@
+{
+  "schema": "falcon-signatures/algorand-lsig-address-kat/",
+  "edwards25519_decode_cases": [
+    {
+      "name": "canonical main-subgroup base point",
+      "encoding_hex": "5866666666666666666666666666666666666666666666666666666666666666",
+      "decodes_to_edwards25519_point": true,
+      "reject_for_lsig_address_derivation": true,
+      "libsodium_crypto_core_ed25519_is_valid_point": true,
+      "note": "Baseline Ed25519 public key accepted by narrow and broad predicates."
+    },
+    {
+      "name": "canonical small-order identity",
+      "encoding_hex": "0100000000000000000000000000000000000000000000000000000000000000",
+      "decodes_to_edwards25519_point": true,
+      "reject_for_lsig_address_derivation": true,
+      "libsodium_crypto_core_ed25519_is_valid_point": false,
+      "note": "Small-order points still decode to Edwards25519 curve points and must be rejected."
+    },
+    {
+      "name": "x-zero sign-bit non-canonical identity",
+      "encoding_hex": "0100000000000000000000000000000000000000000000000000000000000080",
+      "decodes_to_edwards25519_point": true,
+      "reject_for_lsig_address_derivation": true,
+      "libsodium_crypto_core_ed25519_is_valid_point": false,
+      "note": "filippo.io/edwards25519 accepts this ecosystem-compatible non-canonical encoding."
+    },
+    {
+      "name": "non-canonical y equals p",
+      "encoding_hex": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "decodes_to_edwards25519_point": true,
+      "reject_for_lsig_address_derivation": true,
+      "libsodium_crypto_core_ed25519_is_valid_point": false,
+      "note": "The field element is non-canonical but reduces to a valid Edwards25519 point."
+    },
+    {
+      "name": "invalid y equals p plus 2",
+      "encoding_hex": "efffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "decodes_to_edwards25519_point": false,
+      "reject_for_lsig_address_derivation": false,
+      "libsodium_crypto_core_ed25519_is_valid_point": false,
+      "note": "This value does not decode to an Edwards25519 point under the broad predicate."
+    }
+  ],
+  "lsig_derivation": {
+    "name": "counter zero rejected, counter one selected",
+    "falcon_public_key_hex": "0a509c160008596fbb708889ad5871583c818bad60fc4a92592656510504d18ad739038dbfae29b7b8a305a76578aad403923661e58435a20c650a78a637613d01c2e49b2b99ad03f9c3f8134c101815046230e4cb9d9aff6847e1c85abd7da6672086b3dad0d09d1ff44e09022af985e431c5b3348dd74e04bacb3216025a8bb661f26acc83b5e986f4fa818b31ec2116a221431f98e8f39ba3dda9842529bad56ca4387d83e8432009f6200690203d26849a0157ebc74c7c94440fee2a8ffd01809a95ff51445d1bd6515e1455c9f6cd56b03180d1c06cae81830ed68b361f2e8c3e8d9249d17883e8b32a0b170e62e97a669c66179ff82fd9e6affdbe5c62562549a04cb85d5053d9866e5a4e481a5c70aa245dca3ac574885537ca1f225bb87c73c46a9b8a6cb1ed62e025698b081fe43180a612d0ab0891ca709e6ce60bfd8df2932c0742728f3585cd9dd509cd3570be1e99059d3f5ead88334b8aa888a89928805e80a6e5b22a1b073644d41a3b7f04119f96c029b6ea531f95259819a994af804d07f45cf0167eb25001e29075cd4ceb76a21a76fcb4cbf222e313a29257de82c74275371b971f9f01b2b806ab2d6b2fea3db86b50b62669ec94a5adf090d13682b2ae2f02906ebaeddaaa86062ee46015833b541d6805eeb5158d7b53e222d5bd284b0297a7ad5f98667a39e5e98c817384464ee2265273695d1ed79cd44b4b7b90f10d6d63b1d4051224609d64fde4e6be7267d053cf2e7f999325076f9329857b503a49a42759d6d0c395519ea147293cd05b6aae2a009b50f29050f9c1ece4f2717ea7a070e3ce4fc5ae4beaed0d4de4b292314c0432f9beb9281f9f464cd252c253d38b7625c86f69db3ab4e4080511f22aea4211ee468e9b31ba11516d6c6d1644a824d3d179c89066029ef13e6c0791a56b028e5d85d7c2052b43997eb186926e350282aa1f492aa3cdd872d3207c37b666a74943ef5a493196e88cde1a2d07c8131da96df23d311de3fb76ee6563529bfa539d0617c70dae73598f8adcd3910fe834748c22a2746d7e52ab56d700b85e652802c453f66f6a7885a31c7dc0e931cc3f5c58ca28518dd1306c2982318b8d5b24d8091aa33372de9ef88dd63673004a0bd2ec5246d1a29aa214e2acf0140285671a64ca9df9df4cafaa60e89ada8991bf0accab3ac981318a8e5472d24428e5b512c1e4efadfab121f11d0678a06d124e47487d80a7565617d61b15f21431dc426e3d59e573230992f61c21218608538e63d444d6f16f8d983b8a0cba0240bcb11e17e07dd6cef668cb7568fc22aabac41506de859054d2f892c461d3a40082b6c54d8090ce408d302bd2289c6234ac2f222c0c2c19b24558065c6351d83454546d18099e47107f9274218daaa099566b758199eb6700fab3fc0fa4d1dc932bd1c657d26b03399cb9c076c5bd5f4eb5535399e61a1ad1e9b3cd0195c14ad6ed59b8883cdee8e1839259a5f392cc45d862d13044385251520c154b8462e78288df6187aeaf5ffc86a2be5489bd92fd5867c58352447c47e565c7aa3eb1290640b43310c5a30f64e10ddc94b4f199d56f2681b3d3526293fe8ae5f9eb6bad6a64da51caeb31946901aedce80e697850c555c9499e65769ac320aee2bd1483cc37b9c89e39008ee4a03c1880f5d977b7f2019175aacb4c32910079d83b58c97c13566a2e66c2337b83142b28395c607bd56d6031015636c4886ffcea116716aa15848d58ad073d3a30bc7b4f583d5991096aef536b09f89940dbeec73c16bc3bcac1ebbfa15917c0a56d1ce5f9c7c546a50902ac70f8aa1badddb745d51f48b2546fe0d5274e0c5e7d94cfc0e864cc9352e761a94339c6737e1f787fec424bf24b77a42a3c3660d48857e0525a5ad8ab9462238b028a3faa356482bb22e789e2d18b79cab226d1c9330422c85ea14a7273a686449e72718082cfa95130289aedf435b2f6f181181d18a2942361c9a52a62e7f7316f81bc3c252a9a15cd714598030708015a227cf6df1fc99f903a016f2bf7b2b63e4a098cad92709ecad54460a5b05bf4152f976bb4634649c3b654841c26af287317b98fc889ed9f17813591d7c116862a48b777144e38f5b2bb21542b08c23e0b86e89f3bf6d044e1c3018f1017e030a83f2c6e4fc5fbd4dd538a6407e756f829787031f824cfbf1c02eb59ecf16140a872cda5f862027bd6cb4a2d94799360a0ccaf312ed40b8063a606f85e407e9a6a9d6c30c2049b6d12cd2cd462cb2614b907376b07d14ed15bc7548dd9a14acb616300896414d482cac0cfa752ffea5e05b44ee29173da63512f616de1dd1f405e2813869f1dff01b0ef4a34ec8b12a655fb888fed6b90b3c0d0087a5d5e2eb3fd889617a8e5bab0dc23250dc0037750057e65a665d69a9f53c084da7056ab104a1c0254a585a18c02467fceea6fb44a315187d46b7a106229c0df786ecf16a4c1cf6fe2686ad6ceec2e4a9308dac47cb50a7522ee82ae663c13da08a60a7e6986b819670e",
+    "falcon_public_key_sha256_hex": "c349b22ed27138ae7d71558e9853bf7742a4bd6e2068524aee53848a6bb0f34e",
+    "program_length": 1805,
+    "program_prefix_hex": "0c2601010031172d80810e",
+    "program_counter_offset": 4,
+    "program_public_key_offset": 11,
+    "program_suffix_hex": "85",
+    "selected_counter": 1,
+    "selected_address": "5R6J3LSRANL53BYYJ6TBC7NGW74KRNDLKKFROR4A3PSM5S5KP3Q6ALVLII",
+    "selected_address_hex": "ec7c9dae510357dd87184fa6117da6b7f8a8b46b528b174780dbe4cecbaa7ee1",
+    "counter_cases": [
+      {
+        "counter": 0,
+        "address": "K7P6C2SP2LL36EXXMJ3RDVJJZO7EPUX6L6MXHWIFMN6RMCKO5KG7PZZ7DU",
+        "address_hex": "57dfe16a4fd2d7bf12f7627711d529cbbe47d2fe5f9973d905637d16094eea8d",
+        "decodes_to_edwards25519_point": true,
+        "reject_for_lsig_address_derivation": true
+      },
+      {
+        "counter": 1,
+        "address": "5R6J3LSRANL53BYYJ6TBC7NGW74KRNDLKKFROR4A3PSM5S5KP3Q6ALVLII",
+        "address_hex": "ec7c9dae510357dd87184fa6117da6b7f8a8b46b528b174780dbe4cecbaa7ee1",
+        "decodes_to_edwards25519_point": false,
+        "reject_for_lsig_address_derivation": false
+      }
+    ]
+  }
+}
