@@ -1,5 +1,5 @@
 {
-  "schema": "falcon-signatures/algorand-lsig-address-kat/",
+  "schema": "falcon-signatures/algorand-lsig-address-kat/v1",
   "edwards25519_decode_cases": [
     {
       "name": "canonical main-subgroup base point",
