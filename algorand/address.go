@@ -38,8 +38,14 @@ func GetAddressFromPublicKey(publicKey falcongo.PublicKey) ([]byte, error) {
 	return []byte(address), nil
 }
 
-// isOnTheCurve returns true if the 32-byte value decodes to a valid edwards25519
-// curve point (i.e., could be an ed25519 public key), and false otherwise.
+// isOnTheCurve returns true if the 32-byte value decodes to any Edwards25519 curve
+// point.
+//
+// This is deliberately broader than RFC 8032 public-key validation, which also
+// require canonical encoding, main-subgroup membership, and no small-order points.
+// The LSig rejection sampler must reject every 32-byte value that some Ed25519
+// implementation could interpret as a curve point, including non-canonical encodings,
+// small-order points, and points outside the prime-order subgroup.
 func isOnTheCurve(address []byte) bool {
 	_, err := new(edwards25519.Point).SetBytes(address)
 	return err == nil
