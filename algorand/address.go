@@ -77,9 +77,6 @@ func DerivePQLogicSig(publicKey falcongo.PublicKey) (crypto.LogicSigAccount, err
 	return crypto.LogicSigAccount{}, ErrInvalidFalconPublicKey
 }
 
-//go:embed teal/PQlogicsig.teal.tok
-var PQlogicsigPrecompile []byte
-
 // patchPrecompiledPQlogicsig returns the compiled PQlogicsig TEAL code
 // with the given Falcon public key and counter value
 //
