@@ -89,6 +89,36 @@ See [`falcon create`](docs/create.md) documentation for details.
 
 ---
 
+## Security Considerations
+
+External libraries or SDKs integrating the Logic Signature (LSig) template without
+this CLI must implement the following LSig address rejection-sampling predicate:
+
+```text
+Reject the LSig address if the 32-byte value decodes to any Edwards25519 curve point,
+including non-canonical encodings, small-order points, and points outside the prime-order
+subgroup.
+```
+
+The predicate is deliberately broader than strict point validation as a public key.
+**Do not** implement this with Ed25519 libraries that admit only the strict decoding
+rules, such as libsodium/PyNaCl `crypto_core_ed25519_is_valid_point()`.
+
+This repository uses `filippo.io/edwards25519.Point.SetBytes` to implement the predicate.
+
+---
+
+## Integration Tests
+
+Golden fixtures for external integration tests are in [`algorand/testdata/lsig_address_kat.json`](./algorand/testdata/lsig_address_kat.json).
+
+The fixture includes raw Edwards25519 decode cases and a full LSig derivation case
+where counter `0` must be rejected and counter `1` must be selected. See
+[`algorand/testdata/README.md`](./algorand/testdata/README.md) for regeneration
+instructions.
+
+---
+
 ## License
 
 This project is licensed under the **AGPL**.

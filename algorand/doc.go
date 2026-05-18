@@ -4,9 +4,10 @@
 // The logicsig authorizes a transaction only if it is accompanied by a FALCON signature of the
 // transaction ID.
 //
-// Unlike standard accounts, these addresses do not correspond to Ed25519 public keys. Therefore,
-// no private key exists that can sign transactions for them; only the logicsig + FALCON signature
-// can authorize transactions. This property holds even against quantum adversaries.
+// Unlike standard accounts, these addresses do not decode to any Edwards25519 curve point.
+// Therefore, no Ed25519 private key exists that can sign transactions for them; only the
+// logicsig + FALCON signature can authorize transactions. This property holds even against
+// quantum adversaries.
 //
 // The derivation is implemented in `DerivePQLogicSig`, which produces the following TEAL:
 //
@@ -18,7 +19,10 @@
 //	falcon_verify
 //
 // Here, FALCON_PUBLIC_KEY is the input FALCON public key, and COUNTER is a single-byte counter
-// incremented until the resulting logicsig address is not a valid Ed25519 key. On average, two
-// iterations suffice. In the vanishingly unlikely event that all 256 counters yield valid Ed25519
-// keys, the FALCON public key is deemed unsuitable to derive an Algorand account.
+// incremented until the resulting logicsig address does not decode to any Edwards25519 point.
+// This is intentionally broader than strict public-key validation: non-canonical
+// encodings, small-order points, and points outside the prime-order subgroup are
+// all rejected. On average, two iterations suffice. In the vanishingly unlikely
+// event that all 256 counters yield Edwards25519 points, the FALCON public key is
+// deemed unsuitable to derive an Algorand account.
 package algorand
