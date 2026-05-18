@@ -1,7 +1,6 @@
 package algorand
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -13,8 +12,16 @@ import (
 )
 
 type lsigAddressKAT struct {
+	Schema                  string                   `json:"schema"`
+	Source                  lsigAddressKATSource     `json:"source"`
 	Edwards25519DecodeCases []edwards25519DecodeCase `json:"edwards25519_decode_cases"`
 	LSigDerivation          lsigDerivationFixture    `json:"lsig_derivation"`
+}
+
+type lsigAddressKATSource struct {
+	Generator         string `json:"generator"`
+	RegenerateCommand string `json:"regenerate_command"`
+	FalconSeedHex     string `json:"falcon_seed_hex"`
 }
 
 type edwards25519DecodeCase struct {
@@ -27,18 +34,17 @@ type edwards25519DecodeCase struct {
 }
 
 type lsigDerivationFixture struct {
-	Name                     string            `json:"name"`
-	FalconPublicKeyHex       string            `json:"falcon_public_key_hex"`
-	FalconPublicKeySHA256Hex string            `json:"falcon_public_key_sha256_hex"`
-	ProgramLength            int               `json:"program_length"`
-	ProgramPrefixHex         string            `json:"program_prefix_hex"`
-	ProgramCounterOffset     int               `json:"program_counter_offset"`
-	ProgramPublicKeyOffset   int               `json:"program_public_key_offset"`
-	ProgramSuffixHex         string            `json:"program_suffix_hex"`
-	SelectedCounter          int               `json:"selected_counter"`
-	SelectedAddress          string            `json:"selected_address"`
-	SelectedAddressHex       string            `json:"selected_address_hex"`
-	CounterCases             []lsigCounterCase `json:"counter_cases"`
+	Name                   string            `json:"name"`
+	FalconPublicKeyHex     string            `json:"falcon_public_key_hex"`
+	ProgramLength          int               `json:"program_length"`
+	ProgramPrefixHex       string            `json:"program_prefix_hex"`
+	ProgramCounterOffset   int               `json:"program_counter_offset"`
+	ProgramPublicKeyOffset int               `json:"program_public_key_offset"`
+	ProgramSuffixHex       string            `json:"program_suffix_hex"`
+	SelectedCounter        int               `json:"selected_counter"`
+	SelectedAddress        string            `json:"selected_address"`
+	SelectedAddressHex     string            `json:"selected_address_hex"`
+	CounterCases           []lsigCounterCase `json:"counter_cases"`
 }
 
 type lsigCounterCase struct {
@@ -116,12 +122,6 @@ func TestDerivePQLogicSig_GoldenFixture(t *testing.T) {
 	if len(publicKeyBytes) != len(falcongo.PublicKey{}) {
 		t.Fatalf("Falcon public key length = %d, want %d",
 			len(publicKeyBytes), len(falcongo.PublicKey{}))
-	}
-
-	publicKeyHash := sha256.Sum256(publicKeyBytes)
-	if got := hex.EncodeToString(publicKeyHash[:]); got != derivation.FalconPublicKeySHA256Hex {
-		t.Fatalf("Falcon public key SHA-256 = %s, want %s",
-			got, derivation.FalconPublicKeySHA256Hex)
 	}
 
 	var publicKey falcongo.PublicKey
