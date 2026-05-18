@@ -113,7 +113,9 @@ This repository uses `filippo.io/edwards25519.Point.SetBytes` to implement the p
 Golden fixtures for external integration tests are in [`algorand/testdata/lsig_address_kat.json`](./algorand/testdata/lsig_address_kat.json).
 
 The fixture includes raw Edwards25519 decode cases and a full LSig derivation case
-where counter `0` must be rejected and counter `1` must be selected.
+where counter `0` must be rejected and counter `1` must be selected. See
+[`algorand/testdata/README.md`](./algorand/testdata/README.md) for regeneration
+instructions.
 
 ---
 
