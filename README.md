@@ -100,9 +100,9 @@ including non-canonical encodings, small-order points, and points outside the pr
 subgroup.
 ```
 
-The predicate is deliberately broader than strict 8032 point validation as a public
-key. **Do not** implement this with Ed25519 libraries that admit only the strict
-decoding rules, such as libsodium/PyNaCl `crypto_core_ed25519_is_valid_point()`.
+The predicate is deliberately broader than strict point validation as a public key.
+**Do not** implement this with Ed25519 libraries that admit only the strict decoding
+rules, such as libsodium/PyNaCl `crypto_core_ed25519_is_valid_point()`.
 
 This repository uses `filippo.io/edwards25519.Point.SetBytes` to implement the predicate.
 
