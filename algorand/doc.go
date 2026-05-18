@@ -20,7 +20,7 @@
 //
 // Here, FALCON_PUBLIC_KEY is the input FALCON public key, and COUNTER is a single-byte counter
 // incremented until the resulting logicsig address does not decode to any Edwards25519 point.
-// This is intentionally broader than RFC 8032 public-key validation: non-canonical
+// This is intentionally broader than strict public-key validation: non-canonical
 // encodings, small-order points, and points outside the prime-order subgroup are
 // all rejected. On average, two iterations suffice. In the vanishingly unlikely
 // event that all 256 counters yield Edwards25519 points, the FALCON public key is

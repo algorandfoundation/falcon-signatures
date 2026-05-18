@@ -13,5 +13,5 @@ subgroup.
 
 The fixture includes:
 
-- `edwards25519_decode_cases`: raw 32-byte values to test the required predicate vs. RFC 8032 public-key validation (e.g., libsodium's `crypto_core_ed25519_is_valid_point`).
+- `edwards25519_decode_cases`: raw 32-byte values to test the required predicate vs. strict public-key validation (e.g., libsodium's `crypto_core_ed25519_is_valid_point`).
 - `lsig_derivation`: a complete Falcon public key and LSig derivation case where counter `0` is rejected and counter `1` is selected.
