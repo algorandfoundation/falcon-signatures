@@ -19,3 +19,11 @@ Show help for a specific command:
 ```bash
 falcon help create
 ```
+
+Run help through Docker:
+
+```bash
+docker run --rm falcon help
+```
+
+Build and file-mount examples are in [docs/docker.md](docker.md).
