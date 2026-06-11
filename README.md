@@ -61,6 +61,26 @@ Run `make help` to see all available commands.
 
 ---
 
+#### Build and run with Docker
+
+If you prefer not to install Go locally, you can build and run `falcon` with Docker:
+
+```bash
+docker build -t falcon .
+docker run --rm falcon help
+```
+
+To use local files such as keypairs, signatures, or message files, mount the current directory into the container:
+
+```bash
+docker run --rm -v "$PWD:/work" -w /work falcon create --out mykeys.json
+docker run --rm -v "$PWD:/work" -w /work falcon sign --key mykeys.json --msg "hello world"
+```
+
+See [`docs/docker.md`](docs/docker.md) for more Docker examples.
+
+---
+
 ## Usage
 
 Available commands:
@@ -74,6 +94,7 @@ Available commands:
 | [`falcon version`](docs/version.md) | Show the CLI build version |
 | [`falcon help`](docs/help.md) | Show help |
 | [`falcon algorand`](docs/algorand.md) | Algorand-specific commands |
+| [`Docker usage`](docs/docker.md) | Build and run `falcon` with Docker |
 
 ---
 
