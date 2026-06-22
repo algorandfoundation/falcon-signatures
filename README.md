@@ -77,6 +77,8 @@ docker run --rm -v "$PWD:/work" -w /work falcon create --out mykeys.json
 docker run --rm -v "$PWD:/work" -w /work falcon sign --key mykeys.json --msg "hello world"
 ```
 
+On Linux/macOS, consider adding `--user "$(id -u):$(id -g)"` to `docker run` so files written to mounted volumes aren't owned by root.
+
 See [`docs/docker.md`](docs/docker.md) for more Docker examples.
 
 ---

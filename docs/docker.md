@@ -39,6 +39,7 @@ docker run --rm -v "$PWD:/work" -w /work falcon verify --key mykeys.json --msg "
 ## Notes
 
 - The container entrypoint is `falcon`, so anything after the image name is passed directly to the CLI.
+- On Linux/macOS, consider `--user "$(id -u):$(id -g)"` so created files in mounted volumes aren't owned by root.
 - On Windows PowerShell, use `${PWD}:/work` instead of `$PWD:/work` if needed:
 
 ```powershell
