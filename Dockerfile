@@ -6,6 +6,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+RUN mkdir -p build
 RUN make build
 
 FROM debian:bookworm-slim
