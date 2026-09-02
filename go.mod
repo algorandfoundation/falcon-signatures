@@ -6,9 +6,9 @@ require github.com/algorand/falcon v0.1.0
 
 require (
 	filippo.io/edwards25519 v1.2.0
-	github.com/algorand/go-algorand-sdk/v2 v2.11.1
-	golang.org/x/crypto v0.53.0
-	golang.org/x/text v0.38.0
+	github.com/algorand/go-algorand-sdk/v2 v2.12.0
+	golang.org/x/crypto v0.55.0
+	golang.org/x/text v0.41.0
 )
 
 require (
