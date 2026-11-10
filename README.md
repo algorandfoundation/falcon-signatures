@@ -1,3 +1,6 @@
+> [!IMPORTANT]  
+> **ARCHIVED:** Experimental Falcon-1024 tooling, superseded by native Falcon accounts on Algorand.
+
 # falcon – a CLI tool to explore FALCON signatures
 
 This repository introduces the **falcon** CLI tool, designed to facilitate exploration of the FALCON signature scheme.
